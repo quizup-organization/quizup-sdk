@@ -1,0 +1,5 @@
+io.github.quizup.axon.autoconfigure.AxonDistributedKafkaAutoConfiguration
+io.github.quizup.axon.autoconfigure.AxonDistributedQueryAutoConfiguration
+io.github.quizup.axon.autoconfigure.AxonDistributedDeadlineAutoConfiguration
+io.github.quizup.axon.autoconfigure.AxonDistributedFlywayMigrationAutoConfiguration
+io.github.quizup.axon.autoconfigure.AxonDistributedFallbackRegistrationAutoConfiguration
