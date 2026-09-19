@@ -153,4 +153,3 @@ Packages sous `io.github.quizup.microservice.core.domain.*` :
 **`SecurityHelper`** (package `io.github.quizup.microservice.security`, module autoconfigure) —
 extraction du contexte JWT : `getUserId()`, `getUserEmail()`, `findUserId()`, `getPrincipal()`,
 `isAuthenticated()`. **Uniquement** utilisable dans les controllers.
-
