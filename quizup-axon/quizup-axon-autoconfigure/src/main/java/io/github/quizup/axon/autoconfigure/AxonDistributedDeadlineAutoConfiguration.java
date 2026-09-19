@@ -1,6 +1,7 @@
 package io.github.quizup.axon.autoconfigure;
 
 import com.github.kagkarlsson.scheduler.Scheduler;
+import com.github.kagkarlsson.scheduler.boot.autoconfigure.DbSchedulerAutoConfiguration;
 import com.github.kagkarlsson.scheduler.task.Task;
 import io.github.quizup.axon.deadline.CombinedDeadlineManager;
 import org.axonframework.common.transaction.TransactionManager;
@@ -38,7 +39,9 @@ import org.springframework.context.annotation.Bean;
                 AxonAutoConfiguration.class,
                 AxonDbSchedulerAutoConfiguration.class
         },
-        afterName = "com.github.kagkarlsson.scheduler.boot.autoconfigure.DbSchedulerAutoConfiguration"
+        after = {
+                DbSchedulerAutoConfiguration.class
+        }
 )
 public class AxonDistributedDeadlineAutoConfiguration {
 
