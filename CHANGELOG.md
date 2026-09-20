@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/quizup-organization/quizup-sdk/compare/v1.0.0...v1.1.0) (2026-09-20)
+
+### Features
+
+* **observability:** expose Prometheus metrics and Axon metrics ([caf7034](https://github.com/quizup-organization/quizup-sdk/commit/caf7034c6917e507322d751b5dd3564e56088883))
+
 ## 1.0.0 (2026-09-19)
 
 ### Features
