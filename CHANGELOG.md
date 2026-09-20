@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/quizup-organization/quizup-sdk/compare/v1.1.0...v1.2.0) (2026-09-20)
+
+### Features
+
+* **observability:** structured JSON logs (ECS) and OpenTelemetry tracing ([351eb3f](https://github.com/quizup-organization/quizup-sdk/commit/351eb3f57f1deca5b5ec2cbbdb3fff9b21455e45))
+
 ## [1.1.0](https://github.com/quizup-organization/quizup-sdk/compare/v1.0.0...v1.1.0) (2026-09-20)
 
 ### Features
