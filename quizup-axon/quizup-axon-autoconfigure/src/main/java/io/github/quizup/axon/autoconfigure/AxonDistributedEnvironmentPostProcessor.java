@@ -52,6 +52,14 @@ public class AxonDistributedEnvironmentPostProcessor implements EnvironmentPostP
 
         defaultProperties.put("axon.kafka.consumer.auto-offset-reset", "earliest");
 
+        // Découverte des pairs. Désactivée par défaut : en local on utilise
+        // spring.cloud.discovery.client.simple.instances (URLs), en prod on active le
+        // DiscoveryClient Kubernetes (SPRING_CLOUD_KUBERNETES_ENABLED=true).
+        defaultProperties.put("spring.cloud.kubernetes.enabled", false);
+        // Ne découvre que les Services applicatifs QuizUp (label app.kubernetes.io/part-of).
+        defaultProperties.put("spring.cloud.kubernetes.discovery.filter",
+                "#root.metadata.labels?.get('app.kubernetes.io/part-of') == 'quizup'");
+
         MutablePropertySources propertySources = environment.getPropertySources();
 
         if (propertySources.contains(PROPERTY_SOURCE_NAME)) {

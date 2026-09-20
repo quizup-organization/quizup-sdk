@@ -91,6 +91,14 @@
             <artifactId>spring-cloud-commons</artifactId>
         </dependency>
 
+        <!-- Découverte Kubernetes (prod) : DiscoveryClient natif via l'API k8s.
+             Désactivée par défaut (spring.cloud.kubernetes.enabled=false) ; activée en prod
+             via l'environnement. En local, on utilise spring.cloud.discovery.client.simple.instances. -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-kubernetes-client</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

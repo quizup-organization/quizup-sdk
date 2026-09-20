@@ -31,8 +31,14 @@ public class AxonDistributedFallbackRegistrationAutoConfiguration {
 
     /**
      * Fallback Registration : ne s'active que si aucun Registration n'existe déjà.
-     * En prod avec Kubernetes Discovery, un Registration Kubernetes natif sera
-     * généralement déjà présent, donc ce bean restera inactif automatiquement.
+     *
+     * <p>Spring Cloud Kubernetes ne fournit <b>pas</b> de {@code Registration} (en Kubernetes,
+     * l'enregistrement est géré par la plateforme, cf. sa documentation « Service Registry
+     * Implementation »). Ce fallback est donc la source du {@code Registration} pour le
+     * {@code SpringCloudCommandRouter} d'Axon. Conséquence connue : l'instance locale peut
+     * ne pas être reconnue comme telle par le routeur (host/port différents de l'instance
+     * découverte) — sans impact ici, les queries étant résolues en local d'abord et
+     * {@code scatterGather} n'étant pas utilisé.</p>
      */
     @Bean
     @ConditionalOnMissingBean(Registration.class)
