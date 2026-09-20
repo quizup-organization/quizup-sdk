@@ -1,5 +1,6 @@
 io.github.quizup.axon.autoconfigure.AxonDistributedKafkaAutoConfiguration
 io.github.quizup.axon.autoconfigure.AxonDistributedMetricsAutoConfiguration
+io.github.quizup.axon.autoconfigure.AxonDistributedActivityMetricsAutoConfiguration
 io.github.quizup.axon.autoconfigure.AxonDistributedTracingAutoConfiguration
 io.github.quizup.axon.autoconfigure.AxonDistributedQueryAutoConfiguration
 io.github.quizup.axon.autoconfigure.AxonDistributedDeadlineAutoConfiguration
