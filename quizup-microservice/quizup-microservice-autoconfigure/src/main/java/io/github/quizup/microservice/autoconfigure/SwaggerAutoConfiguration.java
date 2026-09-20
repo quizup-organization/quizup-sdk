@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.properties.SpringDocConfigProperties;
@@ -23,6 +24,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 
 /**
@@ -140,6 +143,13 @@ public class SwaggerAutoConfiguration {
 
         // Construire l'objet OpenAPI
         OpenAPI openAPI = new OpenAPI().info(info);
+
+        // URL publique explicite du serveur (utile derrière un gateway) : sans cela, springdoc
+        // déduit l'URL de la requête et génère l'hôte in-cluster (inaccessible du navigateur).
+        if (StringUtils.hasText(swaggerProps.getServerUrl())) {
+            openAPI.setServers(List.of(new Server().url(swaggerProps.getServerUrl())));
+            logger.info("Swagger: server URL configured: {}", swaggerProps.getServerUrl());
+        }
 
         // Configuration OAuth2 si activée
         if (oauth2Props.isEnabled()) {

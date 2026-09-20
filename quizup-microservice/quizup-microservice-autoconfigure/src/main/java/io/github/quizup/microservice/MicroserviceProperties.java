@@ -151,6 +151,13 @@ public class MicroserviceProperties {
          */
         private String termsOfService;
 
+        /**
+         * URL publique du serveur OpenAPI (ex. derrière un gateway :
+         * {@code https://api.example.com/<service>}). Si vide, springdoc déduit l'URL de la requête
+         * (ce qui donne l'URL in-cluster lorsque la requête vient du gateway).
+         */
+        private String serverUrl;
+
         private boolean useRootPath = true;
 
         private boolean showOauth2Endpoints = false;
