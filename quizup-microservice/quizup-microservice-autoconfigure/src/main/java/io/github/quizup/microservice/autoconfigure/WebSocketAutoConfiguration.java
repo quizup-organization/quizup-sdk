@@ -2,9 +2,6 @@ package io.github.quizup.microservice.autoconfigure;
 
 import io.github.quizup.microservice.MicroserviceProperties;
 import io.github.quizup.microservice.autoconfigure.websocket.StompAuthChannelInterceptor;
-import io.github.quizup.microservice.autoconfigure.websocket.WebSocketMetricsChannelInterceptor;
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -12,14 +9,10 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -63,14 +56,11 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
 
     private final MicroserviceProperties.WebSocketProperties wsProperties;
     private final ObjectProvider<JwtDecoder> jwtDecoderProvider;
-    private final ObjectProvider<MeterRegistry> meterRegistryProvider;
 
     public WebSocketAutoConfiguration(MicroserviceProperties properties,
-                                      ObjectProvider<JwtDecoder> jwtDecoderProvider,
-                                      ObjectProvider<MeterRegistry> meterRegistryProvider) {
+                                      ObjectProvider<JwtDecoder> jwtDecoderProvider) {
         this.wsProperties = properties.getWebsocket();
         this.jwtDecoderProvider = jwtDecoderProvider;
-        this.meterRegistryProvider = meterRegistryProvider;
         logger.info("WebSocket auto-configuration enabled — endpoint: {}", wsProperties.getEndpoint());
     }
 
@@ -78,62 +68,8 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(
                 new StompAuthChannelInterceptor(jwtDecoderProvider, wsProperties.isRequireAuth()));
-        registerMetricsInterceptor(registration, "inbound");
         logger.info("WebSocket STOMP authentication interceptor registered (require-auth: {})",
                 wsProperties.isRequireAuth());
-    }
-
-    @Override
-    public void configureClientOutboundChannel(ChannelRegistration registration) {
-        registerMetricsInterceptor(registration, "outbound");
-    }
-
-    private void registerMetricsInterceptor(ChannelRegistration registration, String direction) {
-        MeterRegistry registry = meterRegistryProvider.getIfAvailable();
-        if (registry != null) {
-            registration.interceptors(new WebSocketMetricsChannelInterceptor(registry, direction));
-            logger.info("WebSocket metrics interceptor registered ({})", direction);
-        }
-    }
-
-    /**
-     * Publie les compteurs/jauges de sessions WebSocket ({@link WebSocketMessageBrokerStats})
-     * après démarrage du contexte, quand le broker est entièrement initialisé.
-     */
-    @Bean
-    ApplicationListener<ApplicationReadyEvent> quizupWebSocketSessionMetrics(
-            ObjectProvider<MeterRegistry> registries,
-            ObjectProvider<WebSocketMessageBrokerStats> statsProvider) {
-        return event -> {
-            MeterRegistry registry = registries.getIfAvailable();
-            WebSocketMessageBrokerStats stats = statsProvider.getIfAvailable();
-            if (registry == null || stats == null) {
-                return;
-            }
-
-            Gauge.builder("quizup.websocket.sessions.active",
-                            () -> stats.getWebSocketSessionStats().getTotalSessions())
-                    .description("Sessions WebSocket actives")
-                    .register(registry);
-            Gauge.builder("quizup.websocket.sessions.transport.errors",
-                            () -> stats.getWebSocketSessionStats().getTransportErrorSessions())
-                    .description("Sessions WebSocket terminées sur erreur de transport")
-                    .register(registry);
-            Gauge.builder("quizup.websocket.stomp.connects",
-                            () -> stats.getStompSubProtocolStats().getTotalConnect())
-                    .description("Nombre total de CONNECT STOMP")
-                    .register(registry);
-            Gauge.builder("quizup.websocket.stomp.connected",
-                            () -> stats.getStompSubProtocolStats().getTotalConnected())
-                    .description("Sessions STOMP connectées")
-                    .register(registry);
-            Gauge.builder("quizup.websocket.stomp.disconnects",
-                            () -> stats.getStompSubProtocolStats().getTotalDisconnect())
-                    .description("Nombre total de DISCONNECT STOMP")
-                    .register(registry);
-
-            logger.info("WebSocket session gauges registered");
-        };
     }
 
     @Override
@@ -163,4 +99,3 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
                 wsProperties.getAllowedOriginPatterns());
     }
 }
-
