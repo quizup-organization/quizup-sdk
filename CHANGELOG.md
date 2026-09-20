@@ -1,3 +1,13 @@
+## [2.0.0](https://github.com/quizup-organization/quizup-sdk/compare/v1.5.0...v2.0.0) (2026-09-20)
+
+### ⚠ BREAKING CHANGES
+
+* **constants:** QuizUpConstants.ADMIN_USER_* and BOT_USER_* are removed; use SYSTEM_USER_ID/SYSTEM_USER_NAME/SYSTEM_USER_EMAIL.
+
+### Code Refactoring
+
+* **constants:** remove legacy admin/bot aliases ([8fc70ba](https://github.com/quizup-organization/quizup-sdk/commit/8fc70bab5410415e7c541dc4f86324e21d3df11f))
+
 ## [1.5.0](https://github.com/quizup-organization/quizup-sdk/compare/v1.4.3...v1.5.0) (2026-09-20)
 
 ### Features
