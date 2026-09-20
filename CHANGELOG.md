@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/quizup-organization/quizup-sdk/compare/v1.2.0...v1.3.0) (2026-09-20)
+
+### Features
+
+* **observability:** WebSocket STOMP metrics ([4dfa6f1](https://github.com/quizup-organization/quizup-sdk/commit/4dfa6f1edd443eb62464094a8e77f779449e840b))
+
 ## [1.2.0](https://github.com/quizup-organization/quizup-sdk/compare/v1.1.0...v1.2.0) (2026-09-20)
 
 ### Features
