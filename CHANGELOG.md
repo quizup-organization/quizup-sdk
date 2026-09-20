@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/quizup-organization/quizup-sdk/compare/v1.3.0...v1.4.0) (2026-09-20)
+
+### Features
+
+* **observability:** Axon activity metrics (commands, events, processors) ([b1e888d](https://github.com/quizup-organization/quizup-sdk/commit/b1e888df1b7dad4518ba2b81915c5ba9488deb4a))
+
 ## [1.3.0](https://github.com/quizup-organization/quizup-sdk/compare/v1.2.0...v1.3.0) (2026-09-20)
 
 ### Features
