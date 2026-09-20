@@ -1,3 +1,9 @@
+## [2.1.1](https://github.com/quizup-organization/quizup-sdk/compare/v2.1.0...v2.1.1) (2026-09-20)
+
+### Bug Fixes
+
+* **discovery:** scope kubernetes discovery to axon services and disable by default ([604b68f](https://github.com/quizup-organization/quizup-sdk/commit/604b68f19f9c6b6bd2edf3a5cf1214ae8653614b))
+
 ## [2.1.0](https://github.com/quizup-organization/quizup-sdk/compare/v2.0.0...v2.1.0) (2026-09-20)
 
 ### Features
