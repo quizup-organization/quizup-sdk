@@ -1,3 +1,9 @@
+## [1.4.1](https://github.com/quizup-organization/quizup-sdk/compare/v1.4.0...v1.4.1) (2026-09-20)
+
+### Bug Fixes
+
+* **observability:** register Axon activity metrics after startup ([be691fa](https://github.com/quizup-organization/quizup-sdk/commit/be691fa2ffb5d9dc21b55b304cc6effc80ddceff))
+
 ## [1.4.0](https://github.com/quizup-organization/quizup-sdk/compare/v1.3.0...v1.4.0) (2026-09-20)
 
 ### Features
