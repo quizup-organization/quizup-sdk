@@ -1,3 +1,9 @@
+## [2.1.0](https://github.com/quizup-organization/quizup-sdk/compare/v2.0.0...v2.1.0) (2026-09-20)
+
+### Features
+
+* **discovery:** support kubernetes discovery client for prod ([666eb73](https://github.com/quizup-organization/quizup-sdk/commit/666eb73886f7a0c89bb615554ce745387caf4a96))
+
 ## [2.0.0](https://github.com/quizup-organization/quizup-sdk/compare/v1.5.0...v2.0.0) (2026-09-20)
 
 ### ⚠ BREAKING CHANGES
