@@ -1,3 +1,9 @@
+## [1.5.0](https://github.com/quizup-organization/quizup-sdk/compare/v1.4.3...v1.5.0) (2026-09-20)
+
+### Features
+
+* **constants:** unify admin and bot into a single system account ([20ec08c](https://github.com/quizup-organization/quizup-sdk/commit/20ec08cf373ba64bc7652072987b63e58f49cc1c))
+
 ## [1.4.3](https://github.com/quizup-organization/quizup-sdk/compare/v1.4.2...v1.4.3) (2026-09-20)
 
 ### Bug Fixes
