@@ -1,3 +1,9 @@
+## [1.4.2](https://github.com/quizup-organization/quizup-sdk/compare/v1.4.1...v1.4.2) (2026-09-20)
+
+### Bug Fixes
+
+* **swagger:** configurable OpenAPI server URL ([0808fee](https://github.com/quizup-organization/quizup-sdk/commit/0808fee563c2010796b3b0ecaea0e504142cd492))
+
 ## [1.4.1](https://github.com/quizup-organization/quizup-sdk/compare/v1.4.0...v1.4.1) (2026-09-20)
 
 ### Bug Fixes
