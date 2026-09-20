@@ -1,3 +1,9 @@
+## [1.4.3](https://github.com/quizup-organization/quizup-sdk/compare/v1.4.2...v1.4.3) (2026-09-20)
+
+### Bug Fixes
+
+* **observability:** remove WebSocket STOMP metrics ([44f053d](https://github.com/quizup-organization/quizup-sdk/commit/44f053d620168f0e5d342131ca4a0cdee29092dd))
+
 ## [1.4.2](https://github.com/quizup-organization/quizup-sdk/compare/v1.4.1...v1.4.2) (2026-09-20)
 
 ### Bug Fixes
