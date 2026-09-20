@@ -173,6 +173,16 @@ Le starter embarque **`micrometer-registry-prometheus`** : chaque service expose
 | `management.endpoint.health.probes.enabled` | `true` |
 | `management.prometheus.metrics.export.enabled` | `true` |
 | `management.metrics.distribution.percentiles-histogram.http.{server,client}.requests` | `true` |
+| `logging.structured.format.console` | `ecs` (logs JSON, corrélés `trace.id`/`span.id`) |
+| `management.tracing.enabled` | `false` (sauf `microservice.observability.tracing.enabled=true`) |
+
+**Traces distribuées** : `micrometer-tracing-bridge-otel` + `opentelemetry-exporter-otlp` sont sur
+le classpath. Le tracing est **désactivé par défaut** ; l'activer avec
+`microservice.observability.tracing.enabled=true` (fait en GitOps via les ConfigMaps de service),
+ce qui fixe le sampling (0,1), l'endpoint OTLP in-cluster (`otel-collector.monitoring`) et active
+les observations Kafka. Côté Axon, `AxonDistributedTracingAutoConfiguration` expose un `SpanFactory`
+(`OpenTelemetrySpanFactory`) adossé à l'`OpenTelemetry` de Spring (sinon Axon utiliserait
+`GlobalOpenTelemetry`, no-op).
 
 > **Règle** : ne **pas** redéclarer ces propriétés dans les `application-*.yml` des services :
 > une déclaration explicite écrase le défaut. **Exception** : `quizup-gateway` déclare son propre

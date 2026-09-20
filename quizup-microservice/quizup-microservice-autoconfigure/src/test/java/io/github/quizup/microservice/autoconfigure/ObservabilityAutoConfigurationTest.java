@@ -27,6 +27,30 @@ class ObservabilityAutoConfigurationTest {
                 .contains("health");
         assertThat(environment.getProperty("management.prometheus.metrics.export.enabled")).isEqualTo("true");
         assertThat(environment.getProperty("management.endpoint.health.probes.enabled")).isEqualTo("true");
+        assertThat(environment.getProperty("logging.structured.format.console")).isEqualTo("ecs");
+    }
+
+    @Test
+    void environmentPostProcessorDisablesTracingByDefault() {
+        MockEnvironment environment = new MockEnvironment();
+
+        new ObservabilityEnvironmentPostProcessor().postProcessEnvironment(environment, new SpringApplication());
+
+        assertThat(environment.getProperty("management.tracing.enabled")).isEqualTo("false");
+        assertThat(environment.getProperty("management.otlp.tracing.endpoint")).isNull();
+    }
+
+    @Test
+    void environmentPostProcessorEnablesTracingWhenRequested() {
+        MockEnvironment environment = new MockEnvironment();
+        environment.setProperty("microservice.observability.tracing.enabled", "true");
+
+        new ObservabilityEnvironmentPostProcessor().postProcessEnvironment(environment, new SpringApplication());
+
+        assertThat(environment.getProperty("management.tracing.enabled")).isEqualTo("true");
+        assertThat(environment.getProperty("management.tracing.sampling.probability")).isEqualTo("0.1");
+        assertThat(environment.getProperty("management.otlp.tracing.endpoint"))
+                .isEqualTo("http://otel-collector.monitoring.svc.cluster.local:4318/v1/traces");
     }
 
     @Test
