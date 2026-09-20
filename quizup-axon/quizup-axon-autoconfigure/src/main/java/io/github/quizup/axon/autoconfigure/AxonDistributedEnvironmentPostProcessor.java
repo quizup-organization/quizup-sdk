@@ -54,11 +54,11 @@ public class AxonDistributedEnvironmentPostProcessor implements EnvironmentPostP
 
         // Découverte des pairs. Désactivée par défaut : en local on utilise
         // spring.cloud.discovery.client.simple.instances (URLs), en prod on active le
-        // DiscoveryClient Kubernetes (SPRING_CLOUD_KUBERNETES_ENABLED=true).
-        defaultProperties.put("spring.cloud.kubernetes.enabled", false);
-        // Ne découvre que les Services applicatifs QuizUp (label app.kubernetes.io/part-of).
+        // DiscoveryClient Kubernetes (SPRING_CLOUD_KUBERNETES_DISCOVERY_ENABLED=true).
+        defaultProperties.put("spring.cloud.kubernetes.discovery.enabled", false);
+        // Ne découvre que les services participant au bus Axon (label app.kubernetes.io/component=axon).
         defaultProperties.put("spring.cloud.kubernetes.discovery.filter",
-                "#root.metadata.labels?.get('app.kubernetes.io/part-of') == 'quizup'");
+                "#root.metadata.labels?.get('app.kubernetes.io/component') == 'axon'");
 
         MutablePropertySources propertySources = environment.getPropertySources();
 
