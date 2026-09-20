@@ -114,9 +114,14 @@ Les services QuizUp utilisent **deux** buses distribués, **tous deux** fournis 
   du starter `axon-springcloud-spring-boot-autoconfigure` (jar Axon). Le bean `RestTemplate` du
   SDK (`@Primary`, avec intercepteur OAuth2 `server-client`) est **injecté** dans
   `RestCapabilityDiscoveryMode` + `SpringHttpCommandBusConnector` de ce starter.
-- **`spring.cloud.discovery.client.simple.instances`** doit être déclaré dans chaque service (profile `local`) avec
-  **tous** les services + leur `uri` — c'est la source de la discovery
-  locale (pas de Eureka/Kubernetes en dev).
+- **Découverte par environnement** :
+  - **local** : `spring.cloud.discovery.client.simple.instances` dans chaque `application-local.yml`
+    (**tous** les services + leur `uri`, ports locaux). Découverte Kubernetes **désactivée**
+    (`spring.cloud.kubernetes.discovery.enabled=false` par défaut dans le SDK).
+  - **prod** : `DiscoveryClient` Kubernetes (`spring-cloud-starter-kubernetes-client`), activé par
+    `SPRING_CLOUD_KUBERNETES_ENABLED=true` + `SPRING_CLOUD_KUBERNETES_DISCOVERY_ENABLED=true`.
+    Un `Role`/`RoleBinding` (SA `default`) est requis pour `list/watch` `services`/`endpoints`.
+    Le SDK filtre sur `app.kubernetes.io/component=axon` (les non-Axon ne sont pas découverts).
 - **Rafraîchissement des capacités** : `SimpleDiscoveryClient` n'émet pas de `HeartbeatEvent`,
   donc `AxonDistributedFallbackRegistrationAutoConfiguration` ré-émet un heartbeat
   périodique (`axon.distributed.spring-cloud.heartbeat-interval`, 10 s) pour que le
