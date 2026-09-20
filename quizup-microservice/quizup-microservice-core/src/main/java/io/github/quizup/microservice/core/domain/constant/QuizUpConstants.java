@@ -6,11 +6,11 @@ package io.github.quizup.microservice.core.domain.constant;
  *
  * <p>Le compte système est <b>unique</b> : il sert à la fois de créateur/administrateur
  * (topics, questions) et d'adversaire bot (parties, matchmaking). Il ne possède aucun
- * credential et ne peut pas se connecter. Les alias {@code ADMIN_*} et {@code BOT_*}
- * pointent volontairement vers le même compte pour ne pas dupliquer les références.</p>
+ * credential et ne peut pas se connecter.</p>
  */
 public interface QuizUpConstants {
 
+    /** Email de contact public de la plateforme (aussi email du compte système). */
     String CONTACT_EMAIL = "quizup.contacts@gmail.com";
 
     /** Identifiant du compte système unique (admin + bot). */
@@ -21,18 +21,4 @@ public interface QuizUpConstants {
 
     /** Email du compte système (non connectable : exclu du flux passwordless). */
     String SYSTEM_USER_EMAIL = CONTACT_EMAIL;
-
-    // --- Alias historiques : même compte système ---
-
-    String ADMIN_USER_ID = SYSTEM_USER_ID;
-
-    String ADMIN_USER_NAME = SYSTEM_USER_NAME;
-
-    String ADMIN_USER_EMAIL = SYSTEM_USER_EMAIL;
-
-    String BOT_USER_ID = SYSTEM_USER_ID;
-
-    String BOT_USER_NAME = SYSTEM_USER_NAME;
-
-    String BOT_USER_EMAIL = SYSTEM_USER_EMAIL;
 }

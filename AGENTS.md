@@ -134,7 +134,7 @@ Les services QuizUp utilisent **deux** buses distribués, **tous deux** fournis 
 Packages sous `io.github.quizup.microservice.core.domain.*` :
 
 - **`exception`** : `BaseProblem`, `ProblemCategory` — base de toutes les exceptions métier
-- **`constant`** : `QuizUpConstants` — IDs système immuables (`ADMIN_USER_ID`, `BOT_USER_ID`, `TEST_USER_ID`)
+- **`constant`** : `QuizUpConstants` — identifiant et email du compte système unique (`SYSTEM_USER_ID`, `SYSTEM_USER_EMAIL`, `SYSTEM_USER_NAME`)
 - **`model.search`** : `SearchCriteria`, `PageResult<T>`, `FilterCriteria`, `SortCriteria`, `PageCriteria`,
   `SearchQuery`, `PageResponse<T>`
 - **`model.notification`** : `NotificationEnvelope<T>` — enveloppe commune des notifications temps réel
