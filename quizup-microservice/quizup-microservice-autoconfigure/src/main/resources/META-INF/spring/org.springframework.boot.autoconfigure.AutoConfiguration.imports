@@ -3,6 +3,7 @@ io.github.quizup.microservice.autoconfigure.ExceptionAutoConfiguration
 io.github.quizup.microservice.autoconfigure.CorsAutoConfiguration
 io.github.quizup.microservice.autoconfigure.SwaggerAutoConfiguration
 io.github.quizup.microservice.autoconfigure.ActuatorAutoConfiguration
+io.github.quizup.microservice.autoconfigure.ObservabilityAutoConfiguration
 io.github.quizup.microservice.autoconfigure.ResourceServerAutoConfiguration
 io.github.quizup.microservice.autoconfigure.PasswordEncoderAutoConfiguration
 io.github.quizup.microservice.autoconfigure.WebSocketAutoConfiguration

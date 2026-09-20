@@ -14,7 +14,7 @@ Fournir à tous les microservices QuizUp :
 
 - les **versions** de dépendances (Spring Boot, Axon, Java, Lombok) via le BOM parent
 - une **auto-configuration Spring Boot** (CORS, Swagger, Security, WebSocket, Actuator,
-  PasswordEncoder, exception handler)
+  **Observabilité** Prometheus/Micrometer, PasswordEncoder, exception handler)
 - des **types domaine partagés** (`microservice-core`) : exceptions (`BaseProblem`,
   `ProblemCategory`), types de recherche (`SearchCriteria`, `PageResult`, `FilterCriteria`,
   `SortCriteria`), mappers, etc.
@@ -79,6 +79,7 @@ Préfixe de contrôle : `microservice:` (classe `MicroserviceProperties`).
 | `ResourceServerAutoConfiguration`      | `microservice.resource-server.enabled`   | OAuth2 JWT (issuer + JWK)                                                                                  |
 | `WebSocketAutoConfiguration`           | `microservice.websocket.enabled`         | STOMP / SockJS + auth JWT de la trame `CONNECT` (`microservice.websocket.require-auth`, défaut `false`)    |
 | `ActuatorAutoConfiguration`            | `microservice.actuator.enabled`          | Spring Boot Actuator                                                                                       |
+| `ObservabilityAutoConfiguration`       | `microservice.observability.enabled`     | Tags communs des métriques Micrometer (`application`, `environment`, `version`) + registre Prometheus     |
 | `PasswordEncoderAutoConfiguration`     | —                                        | Bean `BCryptPasswordEncoder`                                                                               |
 | `MicroserviceAutoConfiguration`        | —                                        | Configuration de base                                                                                      |
 
@@ -153,3 +154,39 @@ Packages sous `io.github.quizup.microservice.core.domain.*` :
 **`SecurityHelper`** (package `io.github.quizup.microservice.security`, module autoconfigure) —
 extraction du contexte JWT : `getUserId()`, `getUserEmail()`, `findUserId()`, `getPrincipal()`,
 `isAuthenticated()`. **Uniquement** utilisable dans les controllers.
+
+---
+
+## 6. Observabilité (métriques Prometheus / Micrometer)
+
+Le starter embarque **`micrometer-registry-prometheus`** : chaque service expose
+`GET /actuator/prometheus` (déjà `permitAll` côté sécurité). Prometheus scrape ce endpoint
+**in-cluster** sur le port du Service nommé `http` (80 → 8080) — jamais via l'Ingress.
+
+**Défauts injectés par `ObservabilityEnvironmentPostProcessor`** (property source
+`quizupObservabilityDefaultProperties`, `addLast` = priorité la plus basse, même modèle que
+`AxonDistributedEnvironmentPostProcessor`) :
+
+| Propriété | Valeur par défaut |
+|---|---|
+| `management.endpoints.web.exposure.include` | `health,info,metrics,prometheus` |
+| `management.endpoint.health.probes.enabled` | `true` |
+| `management.prometheus.metrics.export.enabled` | `true` |
+| `management.metrics.distribution.percentiles-histogram.http.{server,client}.requests` | `true` |
+
+> **Règle** : ne **pas** redéclarer ces propriétés dans les `application-*.yml` des services :
+> une déclaration explicite écrase le défaut. **Exception** : `quizup-gateway` déclare son propre
+> `management.endpoints.web.exposure.include` → il doit inclure `prometheus`.
+
+**Tags communs** (`ObservabilityAutoConfiguration`) : tout compteur/timer/histogramme porte
+`application` (= `spring.application.name`), `environment` (profil actif) et `version`
+(`build-info` ou `info.app.version`).
+
+**Métriques Axon** (`AxonDistributedMetricsAutoConfiguration`, module `quizup-axon`) : branchées
+sur le `MeterRegistry` via `axon-micrometer` (messages dispatchés/traités/en échec, latence des
+buses, event processors). Désactivées automatiquement quand aucun `MeterRegistry` n'est présent
+(tests Axon in-memory).
+
+**KPI métier** : passer par un **port hexagonal** propre à chaque domaine (ex.
+`GameMetricsPort`) implémenté en infrastructure avec `MeterRegistry` (jamais d'import Micrometer
+dans `domain/`).
