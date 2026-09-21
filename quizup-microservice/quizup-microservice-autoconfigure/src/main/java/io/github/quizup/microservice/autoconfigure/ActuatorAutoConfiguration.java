@@ -15,7 +15,6 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
@@ -61,7 +60,6 @@ import java.util.List;
 @AutoConfiguration
 @ConditionalOnClass(WebMvcEndpointHandlerMapping.class)
 @ConditionalOnProperty(prefix = "microservice.actuator", name = "enabled", havingValue = "true", matchIfMissing = true)
-@EnableConfigurationProperties(MicroserviceProperties.class)
 public class ActuatorAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(ActuatorAutoConfiguration.class);

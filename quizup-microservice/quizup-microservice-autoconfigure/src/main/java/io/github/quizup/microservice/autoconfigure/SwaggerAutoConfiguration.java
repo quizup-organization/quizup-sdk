@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.StringUtils;
 
@@ -62,7 +61,6 @@ import java.util.List;
 @AutoConfiguration
 @ConditionalOnClass(OpenAPI.class)
 @ConditionalOnProperty(prefix = "microservice.swagger", name = "enabled", havingValue = "true", matchIfMissing = true)
-@EnableConfigurationProperties(MicroserviceProperties.class)
 public class SwaggerAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(SwaggerAutoConfiguration.class);

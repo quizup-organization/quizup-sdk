@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -38,7 +37,6 @@ import org.springframework.context.annotation.Import;
  */
 @AutoConfiguration
 @ConditionalOnProperty(prefix = "microservice.exception-handler", name = "enabled", havingValue = "true", matchIfMissing = true)
-@EnableConfigurationProperties(MicroserviceProperties.class)
 @Import({GlobalExceptionHandler.class, ProblemCommandHandlerInterceptor.class, ProblemQueryHandlerInterceptor.class, MessageHandlerConfiguration.class})
 public class ExceptionAutoConfiguration {
 
