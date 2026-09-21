@@ -27,6 +27,16 @@ class ObservabilityAutoConfigurationTest {
                 .contains("health");
         assertThat(environment.getProperty("management.prometheus.metrics.export.enabled")).isEqualTo("true");
         assertThat(environment.getProperty("management.endpoint.health.probes.enabled")).isEqualTo("true");
+        assertThat(environment.getProperty("logging.structured.format.console")).isNull();
+    }
+
+    @Test
+    void environmentPostProcessorEnablesStructuredLogsInProd() {
+        MockEnvironment environment = new MockEnvironment();
+        environment.setActiveProfiles("prod");
+
+        new ObservabilityEnvironmentPostProcessor().postProcessEnvironment(environment, new SpringApplication());
+
         assertThat(environment.getProperty("logging.structured.format.console")).isEqualTo("ecs");
     }
 

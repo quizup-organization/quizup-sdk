@@ -6,6 +6,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.Profiles;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -40,8 +41,11 @@ public class ObservabilityEnvironmentPostProcessor implements EnvironmentPostPro
 
         // Logs structurés JSON au format ECS (collectés par Alloy -> Loki). Le format ECS
         // reprend service.name/version/environment et corrèle trace.id/span.id quand le
-        // tracing est actif.
-        defaultProperties.put("logging.structured.format.console", "ecs");
+        // tracing est actif. Réservé au profil `prod` : en local (et tests) on garde une
+        // console lisible. Les services peuvent toujours forcer `logging.structured.format.console`.
+        if (environment.acceptsProfiles(Profiles.of("prod"))) {
+            defaultProperties.put("logging.structured.format.console", "ecs");
+        }
 
         // Traces distribuées : désactivées par défaut (aucun collecteur OTLP requis en local).
         // Activées en GitOps via `microservice.observability.tracing.enabled=true`, ce qui fixe
