@@ -1,3 +1,13 @@
+## [2.2.0](https://github.com/quizup-organization/quizup-sdk/compare/v2.1.1...v2.2.0) (2026-09-21)
+
+### Features
+
+* **config:** ship shared quizup config fragments ([8c40abb](https://github.com/quizup-organization/quizup-sdk/commit/8c40abbd3a8b8e18f05d2d9d643e938d6a75a683))
+
+### Bug Fixes
+
+* **observability:** emit ECS structured logs only in prod ([67e26fe](https://github.com/quizup-organization/quizup-sdk/commit/67e26fee796141fbdebc1209939b608127214ac7))
+
 ## [2.1.1](https://github.com/quizup-organization/quizup-sdk/compare/v2.1.0...v2.1.1) (2026-09-20)
 
 ### Bug Fixes
