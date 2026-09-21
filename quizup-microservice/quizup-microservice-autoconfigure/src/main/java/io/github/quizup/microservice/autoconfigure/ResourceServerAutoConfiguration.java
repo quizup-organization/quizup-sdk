@@ -127,7 +127,7 @@ public class ResourceServerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(JwtDecoder.class)
     public JwtDecoder jwtDecoder() {
-        String jwkSetUri = properties.getResourceServer().getJwt().getJwkSetUri();
+        String jwkSetUri = properties.resourceServer().jwt().jwkSetUri();
         logger.info("Configuring JWT decoder with JWK Set URI: {}", jwkSetUri);
         return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
     }

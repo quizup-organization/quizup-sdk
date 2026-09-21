@@ -87,78 +87,78 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     public OpenAPI customOpenAPI() {
-        MicroserviceProperties.SwaggerProperties swaggerProps = properties.getSwagger();
-        MicroserviceProperties.SwaggerProperties.ContactProperties contactProps = swaggerProps.getContact();
-        MicroserviceProperties.SwaggerProperties.LicenseProperties licenseProps = swaggerProps.getLicense();
-        MicroserviceProperties.SwaggerProperties.OAuth2Properties oauth2Props = swaggerProps.getOauth2();
+        MicroserviceProperties.Swagger swaggerProps = properties.swagger();
+        MicroserviceProperties.Swagger.Contact contactProps = swaggerProps.contact();
+        MicroserviceProperties.Swagger.License licenseProps = swaggerProps.license();
+        MicroserviceProperties.Swagger.OAuth2 oauth2Props = swaggerProps.oauth2();
 
-        logger.info("Configuring Swagger/OpenAPI for '{}' - version: {}", applicationName, swaggerProps.getVersion());
+        logger.info("Configuring Swagger/OpenAPI for '{}' - version: {}", applicationName, swaggerProps.version());
 
         // Construction de l'objet Info
         Info info = new Info()
                 .title(applicationName + " API")
-                .version(swaggerProps.getVersion())
-                .description(swaggerProps.getDescription());
+                .version(swaggerProps.version())
+                .description(swaggerProps.description());
 
         // Ajout des termes de service si spécifiés
-        if (StringUtils.hasText(swaggerProps.getTermsOfService())) {
-            info.termsOfService(swaggerProps.getTermsOfService());
-            logger.debug("Swagger: Terms of service configured: {}", swaggerProps.getTermsOfService());
+        if (StringUtils.hasText(swaggerProps.termsOfService())) {
+            info.termsOfService(swaggerProps.termsOfService());
+            logger.debug("Swagger: Terms of service configured: {}", swaggerProps.termsOfService());
         }
 
         // Configuration du contact
         Contact contact = new Contact();
 
-        if (StringUtils.hasText(contactProps.getName())) {
-            contact.name(contactProps.getName());
+        if (StringUtils.hasText(contactProps.name())) {
+            contact.name(contactProps.name());
         }
 
-        if (StringUtils.hasText(contactProps.getEmail())) {
-            contact.email(contactProps.getEmail());
+        if (StringUtils.hasText(contactProps.email())) {
+            contact.email(contactProps.email());
         }
 
-        if (StringUtils.hasText(contactProps.getUrl())) {
-            contact.url(contactProps.getUrl());
+        if (StringUtils.hasText(contactProps.url())) {
+            contact.url(contactProps.url());
         }
 
         info.contact(contact);
 
-        logger.debug("Swagger: Contact configured - name: {}, email: {}", contactProps.getName(), contactProps.getEmail());
+        logger.debug("Swagger: Contact configured - name: {}, email: {}", contactProps.name(), contactProps.email());
 
         // Configuration de la licence
         License license = new License();
-        if (StringUtils.hasText(licenseProps.getName())) {
-            license.name(licenseProps.getName());
+        if (StringUtils.hasText(licenseProps.name())) {
+            license.name(licenseProps.name());
         }
 
-        if (StringUtils.hasText(licenseProps.getUrl())) {
-            license.url(licenseProps.getUrl());
+        if (StringUtils.hasText(licenseProps.url())) {
+            license.url(licenseProps.url());
         }
 
         info.license(license);
 
-        logger.debug("Swagger: License configured - name: {}", licenseProps.getName());
+        logger.debug("Swagger: License configured - name: {}", licenseProps.name());
 
         // Construire l'objet OpenAPI
         OpenAPI openAPI = new OpenAPI().info(info);
 
         // URL publique explicite du serveur (utile derrière un gateway) : sans cela, springdoc
         // déduit l'URL de la requête et génère l'hôte in-cluster (inaccessible du navigateur).
-        if (StringUtils.hasText(swaggerProps.getServerUrl())) {
-            openAPI.setServers(List.of(new Server().url(swaggerProps.getServerUrl())));
-            logger.info("Swagger: server URL configured: {}", swaggerProps.getServerUrl());
+        if (StringUtils.hasText(swaggerProps.serverUrl())) {
+            openAPI.setServers(List.of(new Server().url(swaggerProps.serverUrl())));
+            logger.info("Swagger: server URL configured: {}", swaggerProps.serverUrl());
         }
 
         // Configuration OAuth2 si activée
-        if (oauth2Props.isEnabled()) {
+        if (oauth2Props.enabled()) {
             configureOAuth2Security(openAPI, oauth2Props);
         }
 
-        if (swaggerProps.isShowOauth2Endpoints()) {
+        if (swaggerProps.showOauth2Endpoints()) {
             springDocConfigProperties.setShowOauth2Endpoints(true);
         }
 
-        if (swaggerProps.isUseRootPath()) {
+        if (swaggerProps.useRootPath()) {
             swaggerUiConfigProperties.setUseRootPath(true);
         }
 
@@ -171,21 +171,21 @@ public class SwaggerAutoConfiguration {
     /**
      * Configure la sécurité OAuth2 pour Swagger UI avec PKCE
      */
-    private void configureOAuth2Security(OpenAPI openAPI, MicroserviceProperties.SwaggerProperties.OAuth2Properties oauth2Props) {
-        String authServerUrl = oauth2Props.getAuthorizationServerUrl();
+    private void configureOAuth2Security(OpenAPI openAPI, MicroserviceProperties.Swagger.OAuth2 oauth2Props) {
+        String authServerUrl = oauth2Props.authorizationServerUrl();
         String authorizationUrl = authServerUrl + "/oauth2/authorize";
         String tokenUrl = authServerUrl + "/oauth2/token";
 
         logger.info("Configuring Swagger OAuth2 security with authorization server: {}", authServerUrl);
         logger.debug("OAuth2 Authorization URL: {}", authorizationUrl);
         logger.debug("OAuth2 Token URL: {}", tokenUrl);
-        logger.debug("OAuth2 Client ID: {}", oauth2Props.getClientId());
-        logger.debug("OAuth2 PKCE enabled: {}", oauth2Props.isUsePkce());
+        logger.debug("OAuth2 Client ID: {}", oauth2Props.clientId());
+        logger.debug("OAuth2 PKCE enabled: {}", oauth2Props.usePkce());
 
         // Créer les scopes
         Scopes scopes = new Scopes();
 
-        for (String scope : oauth2Props.getScopes()) {
+        for (String scope : oauth2Props.scopes()) {
             scopes.addString(scope, "Scope: " + scope);
         }
 
@@ -200,27 +200,27 @@ public class SwaggerAutoConfiguration {
 
         SecurityScheme securityScheme = new SecurityScheme()
                 .type(SecurityScheme.Type.OAUTH2)
-                .description("OAuth2 Authorization Code" + (oauth2Props.isUsePkce() ? " with PKCE" : ""))
+                .description("OAuth2 Authorization Code" + (oauth2Props.usePkce() ? " with PKCE" : ""))
                 .flows(oAuthFlows);
 
         openAPI.components(new Components()
                 .addSecuritySchemes(OAUTH2_SECURITY_SCHEME, securityScheme));
 
         openAPI.addSecurityItem(new SecurityRequirement()
-                .addList(OAUTH2_SECURITY_SCHEME, oauth2Props.getScopes()));
+                .addList(OAUTH2_SECURITY_SCHEME, oauth2Props.scopes()));
 
         // ✅ Activation PKCE via les init-params Swagger UI
-        if (oauth2Props.isUsePkce()) {
+        if (oauth2Props.usePkce()) {
             swaggerUiOAuthProperties.setUsePkceWithAuthorizationCodeGrant(true);
             logger.info("Swagger UI PKCE enabled (usePkceWithAuthorizationCodeGrant=true)");
         }
 
         // Pré-remplissage du client_id dans la modale Swagger UI
-        if (StringUtils.hasText(oauth2Props.getClientId())) {
-            swaggerUiOAuthProperties.setClientId(oauth2Props.getClientId());
+        if (StringUtils.hasText(oauth2Props.clientId())) {
+            swaggerUiOAuthProperties.setClientId(oauth2Props.clientId());
         }
 
-        swaggerUiOAuthProperties.setScopes(oauth2Props.getScopes());
+        swaggerUiOAuthProperties.setScopes(oauth2Props.scopes());
 
         logger.info("Swagger OAuth2 security configured — auth: {}", authorizationUrl);
     }

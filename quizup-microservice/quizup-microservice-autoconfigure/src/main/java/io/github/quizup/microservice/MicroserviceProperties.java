@@ -2,401 +2,133 @@ package io.github.quizup.microservice;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
 /**
- * Configuration properties for QuizUp Microservices Starter.
+ * Configuration properties for the QuizUp Microservices Starter.
  * <p>
- * Provides auto-configuration for CORS, Swagger/OpenAPI, Exception Handling, and Actuator.
- * <p>
- * Example configuration:
- * <pre>
- * microservice:
- *   cors:
- *     enabled: true
- *     allowed-origins: http://localhost:3000,http://localhost:4200
- *     allowed-methods: GET,POST,PUT,DELETE
- *     allowed-headers: "*"
- *     allow-credentials: true
- *     max-age: 3600
- *   swagger:
- *     enabled: true
- *     version: 1.0.0
- *     description: API Documentation
- *     contact:
- *       name: QuizUp Team
- *       email: contact@quizup.com
- *       url: https://quizup.com
- *     license:
- *       name: Apache 2.0
- *       url: https://www.apache.org/licenses/LICENSE-2.0.html
- *   exception-handler:
- *     enabled: true
- *     log-stack-trace: true
- *     include-binding-errors: true
- *   actuator:
- *     enabled: true
- * </pre>
+ * Records immuables : chaque composant a une valeur par défaut ({@link DefaultValue}), donc
+ * les services ne déclarent que les propriétés qu'ils surchargent.
  */
-@Setter
-@Getter
 @Validated
 @ConfigurationProperties(prefix = "microservice")
-public class MicroserviceProperties {
-
-    @Valid
-    @NestedConfigurationProperty
-    private CorsProperties cors = new CorsProperties();
-
-    @Valid
-    @NestedConfigurationProperty
-    private SwaggerProperties swagger = new SwaggerProperties();
-
-    @Valid
-    @NestedConfigurationProperty
-    private ExceptionHandlerProperties exceptionHandler = new ExceptionHandlerProperties();
-
-    @Valid
-    @NestedConfigurationProperty
-    private ActuatorProperties actuator = new ActuatorProperties();
-
-    @Valid
-    @NestedConfigurationProperty
-    private ResourceServerProperties resourceServer = new ResourceServerProperties();
-
-    @Valid
-    @NestedConfigurationProperty
-    private WebSocketProperties websocket = new WebSocketProperties();
+public record MicroserviceProperties(
+        @Valid @DefaultValue Cors cors,
+        @Valid @DefaultValue Swagger swagger,
+        @Valid @DefaultValue ExceptionHandler exceptionHandler,
+        @Valid @DefaultValue Actuator actuator,
+        @Valid @DefaultValue ResourceServer resourceServer,
+        @Valid @DefaultValue WebSocket websocket) {
 
     /**
-     * Configuration properties for CORS (Cross-Origin Resource Sharing)
+     * Configuration properties for CORS (Cross-Origin Resource Sharing).
      */
-    @Setter
-    @Getter
-    public static class CorsProperties {
-
-        /**
-         * Enable or disable CORS configuration
-         */
-        private boolean enabled = true;
-
-        /**
-         * List of allowed origins. Use "*" for all origins or specific URLs.
-         * When allowCredentials is true, cannot use "*" - must specify actual origins.
-         */
-        @NotEmpty(message = "At least one allowed origin must be specified")
-        private List<String> allowedOrigins = List.of("*");
-
-        /**
-         * List of allowed HTTP methods
-         */
-        @NotEmpty(message = "At least one allowed method must be specified")
-        private List<String> allowedMethods = List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS");
-
-        /**
-         * List of allowed headers
-         */
-        @NotEmpty(message = "At least one allowed header must be specified")
-        private List<String> allowedHeaders = List.of("*");
-
-        /**
-         * List of exposed headers
-         */
-        private List<String> exposedHeaders = List.of();
-
-        /**
-         * Whether credentials (cookies, authorization headers) are allowed
-         */
-        private boolean allowCredentials = true;
-
-        /**
-         * How long (in seconds) the response from a pre-flight request can be cached
-         */
-        private Long maxAge = 3600L;
-
+    public record Cors(
+            @DefaultValue("true") boolean enabled,
+            @NotEmpty @DefaultValue("*") List<String> allowedOrigins,
+            @NotEmpty @DefaultValue({ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" }) List<String> allowedMethods,
+            @NotEmpty @DefaultValue("*") List<String> allowedHeaders,
+            @DefaultValue List<String> exposedHeaders,
+            @DefaultValue("true") boolean allowCredentials,
+            @DefaultValue("3600") Long maxAge) {
     }
 
     /**
-     * Configuration properties for Swagger/OpenAPI documentation
+     * Configuration properties for Swagger/OpenAPI documentation.
      */
-    @Setter
-    @Getter
-    public static class SwaggerProperties {
-
-        /**
-         * Enable or disable Swagger/OpenAPI configuration
-         */
-        private boolean enabled = true;
-
-        /**
-         * API version
-         */
-        @NotEmpty(message = "API version must be specified")
-        private String version = "1.0.0";
-
-        /**
-         * API description
-         */
-        @NotEmpty(message = "API description must be specified")
-        private String description = "API Documentation";
-
-        /**
-         * Terms of service URL
-         */
-        private String termsOfService;
-
-        /**
-         * URL publique du serveur OpenAPI (ex. derrière un gateway :
-         * {@code https://api.example.com/<service>}). Si vide, springdoc déduit l'URL de la requête
-         * (ce qui donne l'URL in-cluster lorsque la requête vient du gateway).
-         */
-        private String serverUrl;
-
-        private boolean useRootPath = true;
-
-        private boolean showOauth2Endpoints = false;
-
-        /**
-         * Contact information
-         */
-        @Valid
-        @NestedConfigurationProperty
-        private ContactProperties contact = new ContactProperties();
-
-        /**
-         * License information
-         */
-        @Valid
-        @NestedConfigurationProperty
-        private LicenseProperties license = new LicenseProperties();
-
-        /**
-         * OAuth2 configuration for Swagger UI
-         */
-        @Valid
-        @NestedConfigurationProperty
-        private OAuth2Properties oauth2 = new OAuth2Properties();
-
-        /**
-         * OAuth2 configuration for Swagger UI authentication
-         */
-        @Setter
-        @Getter
-        public static class OAuth2Properties {
-
+    public record Swagger(
+            @DefaultValue("true") boolean enabled,
+            @NotEmpty @DefaultValue("1.0.0") String version,
+            @NotEmpty @DefaultValue("API Documentation") String description,
+            @DefaultValue("") String termsOfService,
             /**
-             * Enable OAuth2 security in Swagger UI
+             * URL publique du serveur OpenAPI (ex. derrière un gateway :
+             * {@code https://api.example.com/<service>}). Si vide, springdoc déduit l'URL de la
+             * requête (ce qui donne l'URL in-cluster lorsque la requête vient du gateway).
              */
-            private boolean enabled = true;
+            @DefaultValue("") String serverUrl,
+            @DefaultValue("true") boolean useRootPath,
+            @DefaultValue("false") boolean showOauth2Endpoints,
+            @Valid @DefaultValue Contact contact,
+            @Valid @DefaultValue License license,
+            @Valid @DefaultValue OAuth2 oauth2) {
 
-            /**
-             * Authorization Server URL (issuer)
-             */
-            private String authorizationServerUrl = "http://localhost:8085";
-
-            /**
-             * OAuth2 Client ID for Swagger UI
-             */
-            private String clientId = "swagger";
-
-            /**
-             * OAuth2 scopes to request
-             */
-            private List<String> scopes = List.of("openid", "profile");
-
-            /**
-             * Use PKCE (Proof Key for Code Exchange) - recommended for public clients
-             */
-            private boolean usePkce = true;
-
+        /**
+         * OAuth2 configuration for Swagger UI authentication.
+         */
+        public record OAuth2(
+                @DefaultValue("true") boolean enabled,
+                @DefaultValue("http://localhost:8085") String authorizationServerUrl,
+                @DefaultValue("swagger") String clientId,
+                @DefaultValue({ "openid", "profile" }) List<String> scopes,
+                @DefaultValue("true") boolean usePkce) {
         }
 
         /**
-         * Contact information for the API
+         * Contact information for the API.
          */
-        @Setter
-        @Getter
-        public static class ContactProperties {
-
-            /**
-             * Contact name
-             */
-            private String name = "QuizUp Team";
-
-            /**
-             * Contact email
-             */
-            private String email = "contact@quizup.com";
-
-            /**
-             * Contact URL
-             */
-            private String url;
-
+        public record Contact(
+                @DefaultValue("QuizUp Team") String name,
+                @DefaultValue("contact@quizup.com") String email,
+                @DefaultValue("") String url) {
         }
 
         /**
-         * License information for the API
+         * License information for the API.
          */
-        @Setter
-        @Getter
-        public static class LicenseProperties {
-
-            /**
-             * License name
-             */
-            private String name = "Apache 2.0";
-
-            /**
-             * License URL
-             */
-            private String url = "https://www.apache.org/licenses/LICENSE-2.0.html";
-
+        public record License(
+                @DefaultValue("Apache 2.0") String name,
+                @DefaultValue("https://www.apache.org/licenses/LICENSE-2.0.html") String url) {
         }
     }
 
     /**
-     * Configuration properties for Exception Handler
+     * Configuration properties for the global exception handler.
      */
-    @Setter
-    @Getter
-    public static class ExceptionHandlerProperties {
-
-        /**
-         * Enable or disable global exception handler
-         */
-        private boolean enabled = true;
-
-        /**
-         * Log full stack trace for errors
-         */
-        private boolean logStackTrace = true;
-
-        /**
-         * Include binding errors in validation exception responses
-         */
-        private boolean includeBindingErrors = true;
-
+    public record ExceptionHandler(
+            @DefaultValue("true") boolean enabled,
+            @DefaultValue("true") boolean logStackTrace,
+            @DefaultValue("true") boolean includeBindingErrors) {
     }
 
     /**
-     * Configuration properties for Spring Boot Actuator
+     * Configuration properties for Spring Boot Actuator.
      */
-    @Setter
-    @Getter
-    public static class ActuatorProperties {
-
-        /**
-         * Enable or disable Actuator auto-configuration
-         */
-        private boolean enabled = true;
-
+    public record Actuator(
+            @DefaultValue("true") boolean enabled) {
     }
 
     /**
-     * Configuration properties for Resource Server (OAuth2 JWT validation)
+     * Configuration properties for the Resource Server (OAuth2 JWT validation).
      */
-    @Setter
-    @Getter
-    public static class ResourceServerProperties {
+    public record ResourceServer(
+            @DefaultValue("true") boolean enabled,
+            @Valid @DefaultValue Jwt jwt) {
 
-        /**
-         * Enable or disable Resource Server auto-configuration
-         */
-        private boolean enabled = true;
-
-        /**
-         * JWT configuration
-         */
-        @Valid
-        @NestedConfigurationProperty
-        private JwtProperties jwt = new JwtProperties();
-
-        @Setter
-        @Getter
-        public static class JwtProperties {
-
-            /**
-             * JWT Issuer URI (for token validation)
-             */
-            private String issuerUri = "http://localhost:8085";
-
-            /**
-             * JWK Set URI (for fetching public keys)
-             */
-            private String jwkSetUri = "http://localhost:8085/oauth2/jwks";
-
+        public record Jwt(
+                @DefaultValue("http://localhost:8085") String issuerUri,
+                @DefaultValue("http://localhost:8085/oauth2/jwks") String jwkSetUri) {
         }
-
     }
 
     /**
      * Configuration properties for WebSocket STOMP.
-     * <p>
-     * Example:
-     * <pre>
-     * microservice:
-     *   websocket:
-     *     enabled: true
-     *     endpoint: /ws
-     *     application-destination-prefix: /app
-     *     broker-destinations:
-     *       - /topic
-     *       - /queue
-     *     allowed-origin-patterns:
-     *       - "*"
-     *     with-sock-js: true
-     * </pre>
      */
-    @Setter
-    @Getter
-    public static class WebSocketProperties {
-
-        /**
-         * Enable or disable WebSocket auto-configuration
-         */
-        private boolean enabled = true;
-
-        /**
-         * STOMP endpoint path (SockJS handshake)
-         */
-        @NotEmpty(message = "WebSocket endpoint must be specified")
-        private String endpoint = "/ws";
-
-        /**
-         * Application destination prefix for @MessageMapping methods
-         */
-        @NotEmpty(message = "Application destination prefix must be specified")
-        private String applicationDestinationPrefix = "/app";
-
-        /**
-         * Simple broker destination prefixes
-         */
-        @NotEmpty(message = "At least one broker destination must be specified")
-        private List<String> brokerDestinations = List.of("/topic", "/queue");
-
-        /**
-         * Allowed origin patterns for the WebSocket endpoint
-         */
-        @NotEmpty(message = "At least one allowed origin pattern must be specified")
-        private List<String> allowedOriginPatterns = List.of("*");
-
-        /**
-         * Whether to enable SockJS fallback
-         */
-        private boolean withSockJs = true;
-
-        /**
-         * Whether STOMP CONNECT frames must carry a valid JWT. When {@code false}
-         * (default), unauthenticated sessions are still accepted as anonymous.
-         */
-        private boolean requireAuth = false;
-
+    public record WebSocket(
+            @DefaultValue("true") boolean enabled,
+            @NotEmpty @DefaultValue("/ws") String endpoint,
+            @NotEmpty @DefaultValue("/app") String applicationDestinationPrefix,
+            @NotEmpty @DefaultValue({ "/topic", "/queue" }) List<String> brokerDestinations,
+            @NotEmpty @DefaultValue("*") List<String> allowedOriginPatterns,
+            @DefaultValue("true") boolean withSockJs,
+            /**
+             * Whether STOMP CONNECT frames must carry a valid JWT. When {@code false}
+             * (default), unauthenticated sessions are still accepted as anonymous.
+             */
+            @DefaultValue("false") boolean requireAuth) {
     }
 }

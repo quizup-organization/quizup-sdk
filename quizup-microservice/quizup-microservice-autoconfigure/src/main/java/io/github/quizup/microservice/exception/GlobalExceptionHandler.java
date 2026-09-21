@@ -46,10 +46,10 @@ public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    private final MicroserviceProperties.ExceptionHandlerProperties properties;
+    private final MicroserviceProperties.ExceptionHandler properties;
 
     public GlobalExceptionHandler(MicroserviceProperties microserviceProperties) {
-        this.properties = microserviceProperties.getExceptionHandler();
+        this.properties = microserviceProperties.exceptionHandler();
     }
 
     /**
@@ -75,7 +75,7 @@ public class GlobalExceptionHandler {
 
         Map<String, Object> context = new HashMap<>();
 
-        if (properties.isIncludeBindingErrors()) {
+        if (properties.includeBindingErrors()) {
             Map<String, Object> validationErrors = new HashMap<>();
             ex.getBindingResult().getAllErrors().forEach(error -> {
                 String fieldName = ((FieldError) error).getField();
@@ -120,7 +120,7 @@ public class GlobalExceptionHandler {
                 request.getDescription(false).replace("uri=", "")
         );
 
-        if (properties.isLogStackTrace()) {
+        if (properties.logStackTrace()) {
             logger.warn("Illegal argument", ex);
         } else {
             logger.warn("Illegal argument: {}", ex.getMessage());
@@ -167,7 +167,7 @@ public class GlobalExceptionHandler {
                 request.getDescription(false).replace("uri=", "")
         );
 
-        if (properties.isLogStackTrace()) {
+        if (properties.logStackTrace()) {
             logger.error("Unexpected error occurred", ex);
         } else {
             logger.error("Unexpected error occurred: {}", ex.getMessage());
@@ -227,7 +227,7 @@ public class GlobalExceptionHandler {
                     request.getRequestURI()
             );
 
-            if (properties.isLogStackTrace()) {
+            if (properties.logStackTrace()) {
                 logger.error("handler execution error: type={}, category={}", type, category, ex);
             } else {
                 logger.error("handler execution error: type={}, category={}, message={}", type, category, ex.getMessage());
@@ -237,7 +237,7 @@ public class GlobalExceptionHandler {
         }
 
         // Si pas de détails structurés, erreur générique
-        if (properties.isLogStackTrace()) {
+        if (properties.logStackTrace()) {
             logger.error("Could not handle {}", request.getRequestURI(), ex);
         } else {
             logger.error("Could not handle {} - message: {}", request.getRequestURI(), ex.getMessage());

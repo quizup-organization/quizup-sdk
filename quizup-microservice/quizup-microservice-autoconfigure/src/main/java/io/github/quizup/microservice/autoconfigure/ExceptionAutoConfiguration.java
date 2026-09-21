@@ -43,7 +43,7 @@ public class ExceptionAutoConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(ExceptionAutoConfiguration.class);
 
     public ExceptionAutoConfiguration(MicroserviceProperties properties) {
-        MicroserviceProperties.ExceptionHandlerProperties exceptionProps = properties.getExceptionHandler();
-        logger.info("ExceptionAutoConfiguration enabled - logStackTrace: {}, includeBindingErrors: {}", exceptionProps.isLogStackTrace(), exceptionProps.isIncludeBindingErrors());
+        MicroserviceProperties.ExceptionHandler exceptionProps = properties.exceptionHandler();
+        logger.info("ExceptionAutoConfiguration enabled - logStackTrace: {}, includeBindingErrors: {}", exceptionProps.logStackTrace(), exceptionProps.includeBindingErrors());
     }
 }

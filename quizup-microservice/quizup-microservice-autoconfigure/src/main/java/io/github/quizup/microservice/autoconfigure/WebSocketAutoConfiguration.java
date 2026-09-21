@@ -52,48 +52,48 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketAutoConfiguration.class);
 
-    private final MicroserviceProperties.WebSocketProperties wsProperties;
+    private final MicroserviceProperties.WebSocket wsProperties;
     private final ObjectProvider<JwtDecoder> jwtDecoderProvider;
 
     public WebSocketAutoConfiguration(MicroserviceProperties properties,
                                       ObjectProvider<JwtDecoder> jwtDecoderProvider) {
-        this.wsProperties = properties.getWebsocket();
+        this.wsProperties = properties.websocket();
         this.jwtDecoderProvider = jwtDecoderProvider;
-        logger.info("WebSocket auto-configuration enabled — endpoint: {}", wsProperties.getEndpoint());
+        logger.info("WebSocket auto-configuration enabled — endpoint: {}", wsProperties.endpoint());
     }
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(
-                new StompAuthChannelInterceptor(jwtDecoderProvider, wsProperties.isRequireAuth()));
+                new StompAuthChannelInterceptor(jwtDecoderProvider, wsProperties.requireAuth()));
         logger.info("WebSocket STOMP authentication interceptor registered (require-auth: {})",
-                wsProperties.isRequireAuth());
+                wsProperties.requireAuth());
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        String[] destinations = wsProperties.getBrokerDestinations().toArray(String[]::new);
+        String[] destinations = wsProperties.brokerDestinations().toArray(String[]::new);
         config.enableSimpleBroker(destinations);
-        config.setApplicationDestinationPrefixes(wsProperties.getApplicationDestinationPrefix());
+        config.setApplicationDestinationPrefixes(wsProperties.applicationDestinationPrefix());
         logger.info("WebSocket broker destinations: {}, app prefix: {}",
-                wsProperties.getBrokerDestinations(),
-                wsProperties.getApplicationDestinationPrefix());
+                wsProperties.brokerDestinations(),
+                wsProperties.applicationDestinationPrefix());
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        String[] origins = wsProperties.getAllowedOriginPatterns().toArray(String[]::new);
+        String[] origins = wsProperties.allowedOriginPatterns().toArray(String[]::new);
 
-        var endpoint = registry.addEndpoint(wsProperties.getEndpoint())
+        var endpoint = registry.addEndpoint(wsProperties.endpoint())
                 .setAllowedOriginPatterns(origins);
 
-        if (wsProperties.isWithSockJs()) {
+        if (wsProperties.withSockJs()) {
             endpoint.withSockJS();
         }
 
         logger.info("WebSocket STOMP endpoint registered: {} (SockJS: {}, origins: {})",
-                wsProperties.getEndpoint(),
-                wsProperties.isWithSockJs(),
-                wsProperties.getAllowedOriginPatterns());
+                wsProperties.endpoint(),
+                wsProperties.withSockJs(),
+                wsProperties.allowedOriginPatterns());
     }
 }

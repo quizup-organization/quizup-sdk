@@ -5,6 +5,9 @@ import io.github.quizup.microservice.core.domain.exception.ProblemCategory;
 import io.github.quizup.microservice.core.infrastructure.in.api.response.ExceptionResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -19,7 +22,15 @@ class GlobalExceptionHandlerTest {
 
     @BeforeEach
     void setUp() {
-        handler = new GlobalExceptionHandler(new MicroserviceProperties());
+        new ApplicationContextRunner()
+                .withUserConfiguration(Config.class)
+                .run(context -> handler =
+                        new GlobalExceptionHandler(context.getBean(MicroserviceProperties.class)));
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableConfigurationProperties(MicroserviceProperties.class)
+    static class Config {
     }
 
     @Test

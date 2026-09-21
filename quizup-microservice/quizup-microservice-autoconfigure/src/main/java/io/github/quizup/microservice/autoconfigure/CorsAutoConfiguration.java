@@ -64,47 +64,47 @@ public class CorsAutoConfiguration {
 
     @Bean
     public CorsFilter corsFilter() {
-        MicroserviceProperties.CorsProperties corsProps = properties.getCors();
+        MicroserviceProperties.Cors corsProps = properties.cors();
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
 
         // Configuration des credentials
-        config.setAllowCredentials(corsProps.isAllowCredentials());
+        config.setAllowCredentials(corsProps.allowCredentials());
 
         // Configuration des origines
         // Si allowCredentials est true et qu'on a "*", on utilise allowedOriginPattern
         // Sinon on utilise allowedOrigins
-        if (corsProps.isAllowCredentials() && corsProps.getAllowedOrigins().contains("*")) {
+        if (corsProps.allowCredentials() && corsProps.allowedOrigins().contains("*")) {
             config.addAllowedOriginPattern("*");
             logger.info("CORS: Using origin pattern '*' (allowCredentials=true)");
         } else {
-            corsProps.getAllowedOrigins().forEach(config::addAllowedOrigin);
-            logger.info("CORS: Allowed origins: {}", corsProps.getAllowedOrigins());
+            corsProps.allowedOrigins().forEach(config::addAllowedOrigin);
+            logger.info("CORS: Allowed origins: {}", corsProps.allowedOrigins());
         }
 
         // Configuration des méthodes HTTP
-        corsProps.getAllowedMethods().forEach(config::addAllowedMethod);
-        logger.debug("CORS: Allowed methods: {}", corsProps.getAllowedMethods());
+        corsProps.allowedMethods().forEach(config::addAllowedMethod);
+        logger.debug("CORS: Allowed methods: {}", corsProps.allowedMethods());
 
         // Configuration des headers autorisés
-        corsProps.getAllowedHeaders().forEach(config::addAllowedHeader);
-        logger.debug("CORS: Allowed headers: {}", corsProps.getAllowedHeaders());
+        corsProps.allowedHeaders().forEach(config::addAllowedHeader);
+        logger.debug("CORS: Allowed headers: {}", corsProps.allowedHeaders());
 
         // Configuration des headers exposés
-        if (!corsProps.getExposedHeaders().isEmpty()) {
-            corsProps.getExposedHeaders().forEach(config::addExposedHeader);
-            logger.debug("CORS: Exposed headers: {}", corsProps.getExposedHeaders());
+        if (!corsProps.exposedHeaders().isEmpty()) {
+            corsProps.exposedHeaders().forEach(config::addExposedHeader);
+            logger.debug("CORS: Exposed headers: {}", corsProps.exposedHeaders());
         }
 
         // Configuration du cache pré-flight
-        config.setMaxAge(corsProps.getMaxAge());
-        logger.debug("CORS: Max age: {} seconds", corsProps.getMaxAge());
+        config.setMaxAge(corsProps.maxAge());
+        logger.debug("CORS: Max age: {} seconds", corsProps.maxAge());
 
         source.registerCorsConfiguration("/**", config);
 
         logger.info("CORS configuration successfully applied - allowCredentials: {}",
-                corsProps.isAllowCredentials());
+                corsProps.allowCredentials());
 
         return new CorsFilter(source);
     }

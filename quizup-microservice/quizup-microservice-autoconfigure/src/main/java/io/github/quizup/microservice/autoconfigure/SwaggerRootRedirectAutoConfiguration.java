@@ -1,6 +1,5 @@
 package io.github.quizup.microservice.autoconfigure;
 
-import io.github.quizup.microservice.MicroserviceProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
