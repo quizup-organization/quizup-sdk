@@ -1,0 +1,56 @@
+# Défauts du profil `local`, importés par les services via
+# `spring.config.import: optional:classpath:quizup-local.yml` (depuis application-local.yml).
+#
+# Priorité : un fichier importé est **moins prioritaire** que le fichier qui l'importe
+# et que les variables d'environnement. Chaque service peut donc surcharger ces valeurs
+# (ex. datasource, seed-data).
+#
+# ⚠️ Ports/URLs locaux uniquement — jamais utilisés en prod.
+
+spring:
+  kafka:
+    bootstrap-servers: ${QUIZUP_KAFKA_HOST:localhost}:${QUIZUP_KAFKA_PORT:9092}
+
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            # Découverte des pairs du bus Axon (Spring Cloud Simple Discovery).
+            quizup-identity:
+              - uri: http://localhost:8085
+            quizup-theme:
+              - uri: http://localhost:8086
+            quizup-game:
+              - uri: http://localhost:8082
+            quizup-social:
+              - uri: http://localhost:8087
+            quizup-matchmaking:
+              - uri: http://localhost:8090
+            quizup-profile:
+              - uri: http://localhost:8088
+            quizup-leaderboard:
+              - uri: http://localhost:8091
+
+  security:
+    oauth2:
+      client:
+        # Client M2M `server-client` requis par le distributed command/query bus (Axon).
+        registration:
+          server-client:
+            provider: quizup-identity
+            client-id: server
+            client-secret: ${QUIZUP_IDENTITY_SERVER_CLIENT_SECRET:server-secret}
+            authorization-grant-type: client_credentials
+            scope:
+              - openid
+        provider:
+          quizup-identity:
+            token-uri: http://localhost:8085/oauth2/token
+            jwk-set-uri: http://localhost:8085/oauth2/jwks
+
+# Console lisible en local (le SDK n'active ECS qu'en profil `prod`).
+logging:
+  structured:
+    format:
+      console: ""

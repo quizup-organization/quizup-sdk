@@ -1,0 +1,28 @@
+# Défauts du profil `prod`, importés par les services via
+# `spring.config.import: optional:classpath:quizup-prod.yml` (depuis application-prod.yml).
+#
+# Priorité : un fichier importé est **moins prioritaire** que le fichier qui l'importe
+# et que les variables d'environnement. Chaque service peut donc surcharger ces valeurs.
+#
+# ⚠️ Aucun secret ici : les valeurs sensibles proviennent des variables d'environnement
+# injectées par les ConfigMaps/SealedSecrets GitOps.
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${QUIZUP_DB_HOST:postgres}:${QUIZUP_DB_PORT:5432}/${QUIZUP_DB_NAME}
+    username: ${QUIZUP_DB_USERNAME}
+    password: ${QUIZUP_DB_PASSWORD}
+
+  kafka:
+    bootstrap-servers: ${QUIZUP_KAFKA_HOST:kafka}:${QUIZUP_KAFKA_PORT:9092}
+
+microservice:
+  resource-server:
+    jwt:
+      # JWKS in-cluster (pas de hairpin NAT) ; l'issuer public reste `QUIZUP_IDENTITY_ISSUER`.
+      issuer-uri: ${QUIZUP_AUTH_SERVER_URL:http://quizup-identity.quizup-prod.svc.cluster.local}
+      jwk-set-uri: ${QUIZUP_AUTH_SERVER_JWKS_URL:http://quizup-identity.quizup-prod.svc.cluster.local/oauth2/jwks}
+  swagger:
+    oauth2:
+      # URL PUBLIQUE consommée par le navigateur (le gateway agrège les docs).
+      authorization-server-url: ${MICROSERVICE_SWAGGER_OAUTH2_AUTHORIZATION_SERVER_URL:https://identity.quizup.cnadjim.fr}

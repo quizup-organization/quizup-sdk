@@ -1,0 +1,13 @@
+# Défauts communs QuizUp (namespace applicatif), importés par les services via
+# `spring.config.import: optional:classpath:quizup-defaults.yml`.
+#
+# Priorité : un fichier importé est **moins prioritaire** que le fichier qui l'importe
+# et que les variables d'environnement. Chaque service peut donc surcharger ces valeurs.
+#
+# ⚠️ Ne pas y mettre de secret ni de valeur spécifique à un service.
+
+logging:
+  level:
+    io.github.quizup: ${QUIZUP_LOG_LEVEL:INFO}
+    org.apache.kafka: OFF
+    org.springframework.kafka: OFF
