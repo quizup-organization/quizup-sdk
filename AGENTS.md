@@ -202,6 +202,6 @@ sur le `MeterRegistry` via `axon-micrometer` (messages dispatchés/traités/en �
 buses, event processors). Désactivées automatiquement quand aucun `MeterRegistry` n'est présent
 (tests Axon in-memory).
 
-**KPI métier** : passer par un **port hexagonal** propre à chaque domaine (ex.
-`GameMetricsPort`) implémenté en infrastructure avec `MeterRegistry` (jamais d'import Micrometer
-dans `domain/`).
+**KPI métier** : les compteurs métier par service ont été **retirés** (voir `OBSERVABILITY.md`).
+Si un besoin revient, exposer un **port hexagonal** par domaine (ex. `GameMetricsPort`) implémenté
+en infrastructure avec `MeterRegistry` (jamais d'import Micrometer dans `domain/`).

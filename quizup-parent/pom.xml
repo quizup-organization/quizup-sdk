@@ -52,8 +52,6 @@
         <rabbitmq.version>5.20.0</rabbitmq.version>
         <slf4j.version>2.0.18</slf4j.version>
         <amqp-client.version>5.30.0</amqp-client.version>
-
-        <testcontainers.version>1.19.3</testcontainers.version>
     </properties>
 
     <dependencyManagement>
@@ -78,14 +76,6 @@
                 <groupId>org.axonframework</groupId>
                 <artifactId>axon-bom</artifactId>
                 <version>${axon.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>${testcontainers.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
