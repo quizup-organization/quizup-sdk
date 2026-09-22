@@ -7,18 +7,11 @@ import org.axonframework.eventhandling.TrackedEventMessage;
 import org.axonframework.extensions.kafka.KafkaProperties;
 import org.axonframework.messaging.StreamableMessageSource;
 import org.axonframework.springboot.autoconfig.AxonAutoConfiguration;
-import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Event processing Axon distribué sur Kafka.
@@ -61,33 +54,6 @@ public class AxonDistributedKafkaAutoConfiguration {
                     throw new IllegalStateException(
                             "Event handler type [" + type.getName() + "] must declare @ProcessingGroup.");
                 }));
-    }
-
-    /**
-     * Fail-fast si deux classes distinctes déclarent le même {@link ProcessingGroup} : elles
-     * fusionneraient silencieusement dans le même processor et le même token.
-     */
-    @Bean
-    public SmartInitializingSingleton processingGroupDuplicateGuard(ApplicationContext applicationContext) {
-        return () -> {
-            Map<String, Set<Class<?>>> typesByGroup = new HashMap<>();
-            for (String beanName : applicationContext.getBeanNamesForAnnotation(ProcessingGroup.class)) {
-                Class<?> type = applicationContext.getType(beanName);
-                if (type == null) {
-                    continue;
-                }
-                ProcessingGroup annotation = AnnotationUtils.findAnnotation(type, ProcessingGroup.class);
-                if (annotation != null) {
-                    typesByGroup.computeIfAbsent(annotation.value(), key -> new HashSet<>()).add(type);
-                }
-            }
-            typesByGroup.forEach((group, types) -> {
-                if (types.size() > 1) {
-                    throw new IllegalStateException(
-                            "Duplicate @ProcessingGroup [" + group + "] declared by " + types + ".");
-                }
-            });
-        };
     }
 
     @Bean

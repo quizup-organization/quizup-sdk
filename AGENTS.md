@@ -109,7 +109,8 @@ Les services QuizUp utilisent **deux** buses distribués, **tous deux** fournis 
 - **Processing groups explicites** : chaque classe handler (`@EventHandler`/`@SagaEventHandler`)
   doit porter `@ProcessingGroup("<nom>")` en **kebab-case** (ex. `game-projection`). Le SDK ne déduit
   plus de groupe par défaut (`AxonDistributedKafkaAutoConfiguration`) et **échoue au démarrage** si un
-  handler n'est pas annoté, ou si deux classes déclarent le même groupe. La source par défaut est câblée
+  handler n'est pas annoté (le partage d'un même groupe par plusieurs classes est autorisé :
+  voir la règle « grouper par write-model »). La source par défaut est câblée
   sur `streamableKafkaMessageSource` : tout groupe déclaré est un `TrackingEventProcessor` Kafka, sans
   property par groupe. Replay ciblé = reset du token d'un seul groupe
   (`DELETE FROM token_entry WHERE processor_name = '<groupe>'`).
