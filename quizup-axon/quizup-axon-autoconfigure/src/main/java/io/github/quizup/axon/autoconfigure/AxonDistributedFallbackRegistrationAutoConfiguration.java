@@ -57,23 +57,30 @@ public class AxonDistributedFallbackRegistrationAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(Registration.class)
     public Registration axonDistributedFallbackRegistration(
-            ObjectProvider<DiscoveryClient> discoveryClientProvider,
             Environment environment,
             @Value("${spring.application.name:axon-distributed-application}") String serviceId,
             @Value("${server.address:}") String configuredHost,
             @Value("${server.port:8080}") int port) {
-        return new SimpleRegistration(serviceId, resolveLocalHost(discoveryClientProvider, environment, configuredHost), port);
+        String host = resolveLocalHost(environment, configuredHost);
+        logger.info("Axon fallback Registration: serviceId={}, host={}, port={}", serviceId, host, port);
+        return new SimpleRegistration(serviceId, host, port);
     }
 
-    private String resolveLocalHost(ObjectProvider<DiscoveryClient> discoveryClientProvider,
-                                    Environment environment,
-                                    String configuredHost) {
+    /**
+     * Adresse de l'instance locale : doit correspondre à celle annoncée par le
+     * {@code DiscoveryClient} pour que le routeur reconnaisse le nœud local (sinon il récupère
+     * ses capacités par HTTP et se déclare « incapable » au démarrage → {@code No node known to
+     * accept command}). En Kubernetes, la découverte renvoie l'IP du pod + le port d'endpoint :
+     * on utilise donc {@code spring.cloud.client.ip-address}. Ne pas se fier à la présence d'un
+     * {@code SimpleDiscoveryClient} : Spring Cloud Commons en crée toujours un, même en prod.
+     */
+    private String resolveLocalHost(Environment environment, String configuredHost) {
         if (StringUtils.hasText(configuredHost)) {
             return configuredHost;
         }
-        boolean usesSimpleDiscovery = discoveryClientProvider.stream()
-                .anyMatch(this::containsSimpleDiscoveryClient);
-        if (usesSimpleDiscovery) {
+        boolean kubernetesDiscovery = environment.getProperty(
+                "spring.cloud.kubernetes.discovery.enabled", Boolean.class, false);
+        if (!kubernetesDiscovery) {
             return "localhost";
         }
         String localIp = environment.getProperty("spring.cloud.client.ip-address");

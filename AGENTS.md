@@ -135,8 +135,10 @@ Les services QuizUp utilisent **deux** buses distribués, **tous deux** fournis 
     le `Registration` (Spring Cloud Kubernetes n'en fournit **pas**, le fallback est donc actif **en
     prod aussi**). Son adresse doit **matcher** l'instance découverte, sinon le routeur traite le nœud
     local comme distant (capacités récupérées par HTTP → `No node known to accept command` au
-    démarrage). Règle : `server.address` s'il est défini, sinon `localhost` en SimpleDiscovery (local),
-    sinon l'IP locale du pod (`spring.cloud.client.ip-address`) en Kubernetes. Port = `server.port`.
+    démarrage). Règle : `server.address` s'il est défini, sinon l'IP locale du pod
+    (`spring.cloud.client.ip-address`) quand `spring.cloud.kubernetes.discovery.enabled=true`,
+    sinon `localhost`. Port = `server.port`. (Ne pas détecter via la présence d'un
+    `SimpleDiscoveryClient` : Spring Cloud Commons en crée toujours un, même en prod.)
 - **Rafraîchissement des capacités** : `SimpleDiscoveryClient` n'émet pas de `HeartbeatEvent`,
   donc `AxonDistributedFallbackRegistrationAutoConfiguration` ré-émet un heartbeat
   périodique (`axon.distributed.spring-cloud.heartbeat-interval`, 10 s) pour que le
