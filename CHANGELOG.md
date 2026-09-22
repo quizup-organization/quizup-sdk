@@ -1,3 +1,9 @@
+## [2.3.4](https://github.com/quizup-organization/quizup-sdk/compare/v2.3.3...v2.3.4) (2026-09-22)
+
+### Bug Fixes
+
+* **sdk:** discover not-ready endpoints so the local Axon member survives startup ([63f28e5](https://github.com/quizup-organization/quizup-sdk/commit/63f28e57a3c4647d75b6bc7ee230faba68251c00))
+
 ## [2.3.3](https://github.com/quizup-organization/quizup-sdk/compare/v2.3.2...v2.3.3) (2026-09-22)
 
 ### Bug Fixes
