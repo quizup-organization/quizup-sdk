@@ -139,6 +139,12 @@ Les services QuizUp utilisent **deux** buses distribués, **tous deux** fournis 
     (`spring.cloud.client.ip-address`) quand `spring.cloud.kubernetes.discovery.enabled=true`,
     sinon `localhost`. Port = `server.port`. (Ne pas détecter via la présence d'un
     `SimpleDiscoveryClient` : Spring Cloud Commons en crée toujours un, même en prod.)
+  - **Endpoints non-`Ready`** : `spring.cloud.kubernetes.discovery.include-not-ready-addresses=true`
+    (défaut SDK) pour que le pod local soit découvert **dès sa création**. Sinon, pendant le
+    démarrage, le pod n'est pas dans les Endpoints, un `HeartbeatEvent` reconstruit le
+    `ConsistentHash` sans le membre local → le seeder/saga local échoue en
+    `No node known to accept command`. Verrouillé par
+    `SpringCloudCommandRouterLocalMemberTest`.
 - **Rafraîchissement des capacités** : `SimpleDiscoveryClient` n'émet pas de `HeartbeatEvent`,
   donc `AxonDistributedFallbackRegistrationAutoConfiguration` ré-émet un heartbeat
   périodique (`axon.distributed.spring-cloud.heartbeat-interval`, 10 s) pour que le

@@ -56,6 +56,11 @@ public class AxonDistributedEnvironmentPostProcessor implements EnvironmentPostP
         // Ne découvre que les services participant au bus Axon (label app.kubernetes.io/component=axon).
         defaultProperties.put("spring.cloud.kubernetes.discovery.filter",
                 "#root.metadata.labels?.get('app.kubernetes.io/component') == 'axon'");
+        // Inclure les endpoints non-`Ready` : sinon, pendant le démarrage, le pod local n'apparaît
+        // pas dans les Endpoints, et un HeartbeatEvent reconstruit le ConsistentHash SANS le membre
+        // local -> les commandes locales échouent en `No node known to accept command` (seeders,
+        // sagas). Le fallback Registration porte l'IP du pod pour être reconnu comme local.
+        defaultProperties.put("spring.cloud.kubernetes.discovery.include-not-ready-addresses", true);
 
         MutablePropertySources propertySources = environment.getPropertySources();
 
