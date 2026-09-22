@@ -1,3 +1,9 @@
+## [2.3.3](https://github.com/quizup-organization/quizup-sdk/compare/v2.3.2...v2.3.3) (2026-09-22)
+
+### Bug Fixes
+
+* **sdk:** pick local pod IP for fallback registration under kubernetes discovery ([76b17f7](https://github.com/quizup-organization/quizup-sdk/commit/76b17f7df3d6715e01bd2df0ad8eccde74780873))
+
 ## [2.3.2](https://github.com/quizup-organization/quizup-sdk/compare/v2.3.1...v2.3.2) (2026-09-22)
 
 ### Bug Fixes
