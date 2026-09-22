@@ -1,3 +1,9 @@
+## [2.3.0](https://github.com/quizup-organization/quizup-sdk/compare/v2.2.0...v2.3.0) (2026-09-22)
+
+### Features
+
+* **sdk:** explicit Axon processing groups and query bus metrics ([c105ea4](https://github.com/quizup-organization/quizup-sdk/commit/c105ea4a56aec4817052a6238331a6aaaf8cb247))
+
 ## [2.2.0](https://github.com/quizup-organization/quizup-sdk/compare/v2.1.1...v2.2.0) (2026-09-21)
 
 ### Features
