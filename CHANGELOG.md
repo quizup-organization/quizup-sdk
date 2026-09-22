@@ -1,3 +1,9 @@
+## [2.3.2](https://github.com/quizup-organization/quizup-sdk/compare/v2.3.1...v2.3.2) (2026-09-22)
+
+### Bug Fixes
+
+* **sdk:** allow intentional processing-group sharing (drop duplicate guard) ([e2dbe49](https://github.com/quizup-organization/quizup-sdk/commit/e2dbe4932962d4f09fd99e1a3153e4962f5dbaab))
+
 ## [2.3.1](https://github.com/quizup-organization/quizup-sdk/compare/v2.3.0...v2.3.1) (2026-09-22)
 
 ### Bug Fixes
