@@ -9,7 +9,6 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -42,11 +41,9 @@ public class AxonDistributedEnvironmentPostProcessor implements EnvironmentPostP
         defaultProperties.put("axon.kafka.default-topic", KafkaProperties.DEFAULT_TOPIC);
         defaultProperties.put("axon.kafka.client-id", applicationName);
 
-        for (String group : List.of(applicationName + "-saga", applicationName + "-projection")) {
-            defaultProperties.put("axon.eventhandling.processors." + group + ".mode", "tracking");
-            defaultProperties.put("axon.eventhandling.processors." + group + ".source", "streamableKafkaMessageSource");
-        }
-
+        // Les processing groups sont déclarés explicitement (@ProcessingGroup) ; la source
+        // par défaut (Kafka streamable) est câblée par AxonDistributedKafkaAutoConfiguration.
+        // Ne pas déduire de groupe ici : cela empêcherait les replays ciblés.
         defaultProperties.put("axon.kafka.producer.event-processor-mode", "tracking");
         defaultProperties.put("axon.kafka.consumer.event-processor-mode", "tracking");
 

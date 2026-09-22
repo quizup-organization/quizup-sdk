@@ -106,10 +106,18 @@ Les services QuizUp utilisent **deux** buses distribués, **tous deux** fournis 
 
 **Règles** :
 
-- **Ne pas** redéclarer les props `axon.axonserver.*`, `axon.kafka.*`, `axon.distributed.*`,
-  `axon.eventhandling.processors.*` dans les `application-*.yml` des services — le SDK les définit
-  par défaut via `AxonDistributedEnvironmentPostProcessor` (property source `axonDistributedDefaultProperties`,
-  `addLast` = priorité la plus basse). Seules les **overrides** doivent être déclarées dans le yaml.
+- **Processing groups explicites** : chaque classe handler (`@EventHandler`/`@SagaEventHandler`)
+  doit porter `@ProcessingGroup("<nom>")` en **kebab-case** (ex. `game-projection`). Le SDK ne déduit
+  plus de groupe par défaut (`AxonDistributedKafkaAutoConfiguration`) et **échoue au démarrage** si un
+  handler n'est pas annoté, ou si deux classes déclarent le même groupe. La source par défaut est câblée
+  sur `streamableKafkaMessageSource` : tout groupe déclaré est un `TrackingEventProcessor` Kafka, sans
+  property par groupe. Replay ciblé = reset du token d'un seul groupe
+  (`DELETE FROM token_entry WHERE processor_name = '<groupe>'`).
+- **Ne pas** redéclarer les props `axon.axonserver.*`, `axon.kafka.*`, `axon.distributed.*` dans les
+  `application-*.yml` des services — le SDK les définit par défaut via
+  `AxonDistributedEnvironmentPostProcessor` (property source `axonDistributedDefaultProperties`,
+  `addLast` = priorité la plus basse). Les `axon.eventhandling.processors.*` ne sont que des **overrides
+  ciblés** d'un groupe existant, jamais une déclaration de groupe.
 - Le **distributed command bus** n'est **pas** défini par le SDK (pas d'autoconfig SDK) — il vient
   du starter `axon-springcloud-spring-boot-autoconfigure` (jar Axon). Le bean `RestTemplate` du
   SDK (`@Primary`, avec intercepteur OAuth2 `server-client`) est **injecté** dans
@@ -197,10 +205,20 @@ les observations Kafka. Côté Axon, `AxonDistributedTracingAutoConfiguration` e
 `application` (= `spring.application.name`), `environment` (profil actif) et `version`
 (`build-info` ou `info.app.version`).
 
-**Métriques Axon** (`AxonDistributedMetricsAutoConfiguration`, module `quizup-axon`) : branchées
-sur le `MeterRegistry` via `axon-micrometer` (messages dispatchés/traités/en échec, latence des
-buses, event processors). Désactivées automatiquement quand aucun `MeterRegistry` n'est présent
-(tests Axon in-memory).
+**Métriques Axon** (module `quizup-axon`) : branchées sur le `MeterRegistry` via `axon-micrometer`
+(messages dispatchés/traités/en échec, latence des bus, event processors). Désactivées
+automatiquement quand aucun `MeterRegistry` n'est présent (tests Axon in-memory).
+
+Métriques d'**activité** complémentaires (`quizup.axon.*`), car les bus distribués et l'event bus
+Kafka échappent partiellement au `MessageMonitor` :
+- `AxonMetricsInterceptorConfiguration` (modèle `MessageHandlerConfiguration`) enregistre les
+  intercepteurs des bus en `@PostConstruct` (injection paresseuse `@Lazy @Qualifier("distributedCommandBus"/"distributedQueryBus")`) :
+  `quizup.axon.commands` / `quizup.axon.command.duration`, `quizup.axon.queries` /
+  `quizup.axon.query.duration`, `quizup.axon.events.published`.
+- `AxonDistributedActivityMetricsAutoConfiguration` enregistre le traitement d'événements
+  (`quizup.axon.events.processed` / `quizup.axon.event.duration`) via `ConfigurerModule`, et les
+  jauges d'état (`quizup.axon.event.processor.running|error`) sur `ApplicationReadyEvent`
+  (les processors doivent être initialisés).
 
 **KPI métier** : les compteurs métier par service ont été **retirés** (voir `OBSERVABILITY.md`).
 Si un besoin revient, exposer un **port hexagonal** par domaine (ex. `GameMetricsPort`) implémenté
