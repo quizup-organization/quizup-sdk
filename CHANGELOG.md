@@ -1,3 +1,9 @@
+## [2.3.1](https://github.com/quizup-organization/quizup-sdk/compare/v2.3.0...v2.3.1) (2026-09-22)
+
+### Bug Fixes
+
+* **sdk:** align fallback registration address with kubernetes discovery ([547fe26](https://github.com/quizup-organization/quizup-sdk/commit/547fe26e70d24ba3f22838fa056b9ea15ac46037))
+
 ## [2.3.0](https://github.com/quizup-organization/quizup-sdk/compare/v2.2.0...v2.3.0) (2026-09-22)
 
 ### Features
