@@ -1,3 +1,9 @@
+## [2.4.1](https://github.com/quizup-organization/quizup-sdk/compare/v2.4.0...v2.4.1) (2026-09-23)
+
+### Bug Fixes
+
+* **sdk:** bump PostgreSQL JDBC driver to 42.7.12 (CVE-2026-54291) ([eff48a0](https://github.com/quizup-organization/quizup-sdk/commit/eff48a0eac7f61a8e64af56d7323285abba0a55d))
+
 ## [2.4.0](https://github.com/quizup-organization/quizup-sdk/compare/v2.3.4...v2.4.0) (2026-09-23)
 
 ### Features
