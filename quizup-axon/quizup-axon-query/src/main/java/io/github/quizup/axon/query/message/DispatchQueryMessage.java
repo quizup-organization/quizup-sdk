@@ -16,8 +16,8 @@ import java.util.Objects;
 
 /**
  * Wire representation of a {@link QueryMessage} sent over the internal HTTP query transport
- * (PLAN.md §11.2). Adapted from {@code quizup-axon-starter}'s RabbitMQ-based
- * {@code SpringDispatchQueryMessage} - the payload/metadata/response-type are serialized via
+ * (PLAN.md §11.2). Adapted from {@code quizup-axon-starter}'s {@code SpringDispatchQueryMessage} -
+ * the payload/metadata/response-type are serialized via
  * the Axon {@link Serializer} (Jackson), while this envelope itself is (de)serialized as plain
  * JSON by Spring's HTTP message converters.
  */

@@ -23,7 +23,7 @@ import java.util.Objects;
 
 /**
  * Wire representation of a {@link QueryResponseMessage} sent back over the internal HTTP query
- * transport (PLAN.md §11.2). Adapted from {@code quizup-axon-starter}'s RabbitMQ-based
+ * transport (PLAN.md §11.2). Adapted from {@code quizup-axon-starter}'s
  * {@code SpringReplyQueryMessage}.
  * <p>
  * Correctness rules preserved from the original implementation (PLAN.md §11.2):

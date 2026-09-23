@@ -49,9 +49,7 @@
         <postgresql.version>42.7.11</postgresql.version>
 
         <flyway.version>13.3.0</flyway.version>
-        <rabbitmq.version>5.20.0</rabbitmq.version>
         <slf4j.version>2.0.18</slf4j.version>
-        <amqp-client.version>5.30.0</amqp-client.version>
     </properties>
 
     <dependencyManagement>
@@ -127,12 +125,6 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-database-postgresql</artifactId>
                 <version>${flyway.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.rabbitmq</groupId>
-                <artifactId>amqp-client</artifactId>
-                <version>${amqp-client.version}</version>
             </dependency>
 
             <dependency>
