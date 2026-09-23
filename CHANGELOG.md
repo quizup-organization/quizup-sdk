@@ -1,3 +1,9 @@
+## [2.4.0](https://github.com/quizup-organization/quizup-sdk/compare/v2.3.4...v2.4.0) (2026-09-23)
+
+### Features
+
+* **sdk:** add noContent() 204 helper to ResponseEntityBuilder ([3fd2af1](https://github.com/quizup-organization/quizup-sdk/commit/3fd2af1469fcbfac44c015a627175da418a67eea))
+
 ## [2.3.4](https://github.com/quizup-organization/quizup-sdk/compare/v2.3.3...v2.3.4) (2026-09-22)
 
 ### Bug Fixes
