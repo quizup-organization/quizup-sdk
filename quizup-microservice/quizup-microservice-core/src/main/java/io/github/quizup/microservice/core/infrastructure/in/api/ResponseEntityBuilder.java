@@ -18,4 +18,12 @@ public final class ResponseEntityBuilder {
     public static ResponseEntity<IdResponse> ok(String id) {
         return ResponseEntity.ok(new IdResponse(id));
     }
+
+    /**
+     * Réponse d'une suppression/retrait réussie : {@code 204 No Content} sans corps
+     * (conforme REST — cf. {@code best-practices/.backend/rest-api.md}).
+     */
+    public static ResponseEntity<Void> noContent() {
+        return ResponseEntity.noContent().build();
+    }
 }
