@@ -15,9 +15,17 @@ import java.util.Map;
 public class AxonDistributedEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     private static final String PROPERTY_SOURCE_NAME = "axonDistributedDefaultProperties";
+    private static final String DISABLE_AXONIQ_CONSOLE_MESSAGE = "disable-axoniq-console-message";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+
+        // AxonIQConsoleModule (Axon) lit uniquement la propriété système JVM, pas une propriété Spring :
+        // la poser ici supprime le bandeau « AxonIQ Console » pour tous les services. On respecte une
+        // valeur déjà définie (permet de le réactiver via -Ddisable-axoniq-console-message=false).
+        if (System.getProperty(DISABLE_AXONIQ_CONSOLE_MESSAGE) == null) {
+            System.setProperty(DISABLE_AXONIQ_CONSOLE_MESSAGE, Boolean.TRUE.toString());
+        }
 
         String applicationName = environment.getProperty("spring.application.name", "axon-distributed-application");
 

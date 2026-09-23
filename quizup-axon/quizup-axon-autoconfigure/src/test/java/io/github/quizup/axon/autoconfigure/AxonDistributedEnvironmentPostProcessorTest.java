@@ -22,6 +22,23 @@ class AxonDistributedEnvironmentPostProcessorTest {
     }
 
     @Test
+    void disablesAxonIqConsoleMessageSystemPropertyByDefault() {
+        String previous = System.getProperty("disable-axoniq-console-message");
+        System.clearProperty("disable-axoniq-console-message");
+        try {
+            postProcessor.postProcessEnvironment(environment, new SpringApplication());
+
+            assertThat(System.getProperty("disable-axoniq-console-message")).isEqualTo("true");
+        } finally {
+            if (previous == null) {
+                System.clearProperty("disable-axoniq-console-message");
+            } else {
+                System.setProperty("disable-axoniq-console-message", previous);
+            }
+        }
+    }
+
+    @Test
     void keepsAxonDistributedDefaults() {
         postProcessor.postProcessEnvironment(environment, new SpringApplication());
 
