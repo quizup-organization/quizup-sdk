@@ -1,5 +1,10 @@
 package io.github.quizup.axon.query.message;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.quizup.microservice.core.domain.model.search.DefaultPageResult;
+import io.github.quizup.microservice.core.domain.model.search.PageResult;
+import io.github.quizup.microservice.core.infrastructure.axon.PageResultResponseType;
 import org.axonframework.common.AxonException;
 import org.axonframework.messaging.MetaData;
 import org.axonframework.messaging.RemoteExceptionDescription;
@@ -14,6 +19,7 @@ import org.axonframework.serialization.SerializedMetaData;
 import org.axonframework.serialization.SerializedObject;
 import org.axonframework.serialization.Serializer;
 import org.axonframework.serialization.SimpleSerializedObject;
+import org.axonframework.serialization.json.JacksonSerializer;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -54,6 +60,9 @@ public class ReplyQueryMessage implements Serializable {
     private String responseTypeRevision;
     private byte[] serializedResponseType;
 
+    /** Nom de la classe d'élément pour un {@code PageResult<T>} transporté (sinon null). */
+    private String payloadElementType;
+
     @SuppressWarnings("unused")
     private ReplyQueryMessage() {
         // Used for JSON deserialization
@@ -84,8 +93,13 @@ public class ReplyQueryMessage implements Serializable {
         SerializedObject<byte[]> payloadSerialized;
         try {
             Object payload = queryResponseMessage.getPayload();
-            Object transportPayload = adaptPayloadForTransport(payload, responseType);
-            payloadSerialized = serializer.serialize(transportPayload, byte[].class);
+            if (responseType instanceof PageResultResponseType<?> pageType && payload instanceof PageResult<?> page) {
+                payloadSerialized = serializer.serialize(toPageResultTransport(page), byte[].class);
+                this.payloadElementType = pageType.getExpectedResponseType().getName();
+            } else {
+                Object transportPayload = adaptPayloadForTransport(payload, responseType);
+                payloadSerialized = serializer.serialize(transportPayload, byte[].class);
+            }
         } catch (Exception ignored) {
             payloadSerialized = queryResponseMessage.serializePayload(serializer, byte[].class);
         }
@@ -129,6 +143,20 @@ public class ReplyQueryMessage implements Serializable {
         return new GenericQueryResponseMessage<>(payloadType, exception, metaData);
     }
 
+    private static PageResultTransport<?> toPageResultTransport(PageResult<?> page) {
+        return new PageResultTransport<>(
+                page.content(),
+                page.pageNumber(),
+                page.pageSize(),
+                page.totalElements(),
+                page.totalPages(),
+                page.sorts(),
+                page.first(),
+                page.last(),
+                page.empty()
+        );
+    }
+
     private static Object adaptPayloadForTransport(Object payload, ResponseType<?> responseType) {
         if (payload == null || responseType == null) {
             return payload;
@@ -157,6 +185,27 @@ public class ReplyQueryMessage implements Serializable {
     }
 
     private Object deserializePayload(Serializer serializer) {
+        if (payloadElementType != null && serializer instanceof JacksonSerializer jacksonSerializer) {
+            try {
+                ObjectMapper objectMapper = jacksonSerializer.getObjectMapper();
+                JavaType type = objectMapper.getTypeFactory()
+                        .constructParametricType(PageResultTransport.class, Class.forName(payloadElementType));
+                PageResultTransport<?> transport = objectMapper.readValue(serializedPayload, type);
+                return new DefaultPageResult<>(
+                        transport.content(),
+                        transport.pageNumber(),
+                        transport.pageSize(),
+                        transport.totalElements(),
+                        transport.totalPages(),
+                        transport.sorts(),
+                        transport.first(),
+                        transport.last(),
+                        transport.empty()
+                );
+            } catch (Exception ignored) {
+                // Repli : désérialisation standard (éléments non typés).
+            }
+        }
         return serializer.deserialize(new SimpleSerializedObject<>(
                 serializedPayload, byte[].class, payloadType, payloadRevision
         ));
@@ -191,6 +240,10 @@ public class ReplyQueryMessage implements Serializable {
 
     public String getPayloadRevision() {
         return payloadRevision;
+    }
+
+    public String getPayloadElementType() {
+        return payloadElementType;
     }
 
     public byte[] getSerializedPayload() {
