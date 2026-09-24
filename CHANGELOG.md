@@ -1,3 +1,9 @@
+## [2.4.4](https://github.com/quizup-organization/quizup-sdk/compare/v2.4.3...v2.4.4) (2026-09-24)
+
+### Bug Fixes
+
+* **axiom:** preserve PageResult element types over the distributed query transport ([e28f3d1](https://github.com/quizup-organization/quizup-sdk/commit/e28f3d14653cff057161314916544bb8cc6dcc2a))
+
 ## [2.4.3](https://github.com/quizup-organization/quizup-sdk/compare/v2.4.2...v2.4.3) (2026-09-24)
 
 ### Bug Fixes
