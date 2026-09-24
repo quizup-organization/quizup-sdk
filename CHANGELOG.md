@@ -1,3 +1,9 @@
+## [2.4.3](https://github.com/quizup-organization/quizup-sdk/compare/v2.4.2...v2.4.3) (2026-09-24)
+
+### Bug Fixes
+
+* bus-only Jackson type info for search criteria (keep REST DTOs typeless) ([9d4a715](https://github.com/quizup-organization/quizup-sdk/commit/9d4a715332ad781316f78908c43d4702c470a6d8))
+
 ## [2.4.2](https://github.com/quizup-organization/quizup-sdk/compare/v2.4.1...v2.4.2) (2026-09-24)
 
 ### Bug Fixes
