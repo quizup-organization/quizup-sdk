@@ -1,3 +1,9 @@
+## [2.4.2](https://github.com/quizup-organization/quizup-sdk/compare/v2.4.1...v2.4.2) (2026-09-24)
+
+### Bug Fixes
+
+* add Jackson type info to search criteria interfaces for distributed queries ([f0ab7c2](https://github.com/quizup-organization/quizup-sdk/commit/f0ab7c208f58509d1f120dc3a0c9d9ba70160e1f))
+
 ## [2.4.1](https://github.com/quizup-organization/quizup-sdk/compare/v2.4.0...v2.4.1) (2026-09-23)
 
 ### Bug Fixes
