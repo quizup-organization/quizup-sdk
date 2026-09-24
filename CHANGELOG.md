@@ -1,3 +1,9 @@
+## [2.4.5](https://github.com/quizup-organization/quizup-sdk/compare/v2.4.4...v2.4.5) (2026-09-24)
+
+### Reverts
+
+* Revert "fix(axiom): preserve PageResult element types over the distributed query transport" ([9b2299b](https://github.com/quizup-organization/quizup-sdk/commit/9b2299b9d5eb712027f77add883b3e79c141126f))
+
 ## [2.4.4](https://github.com/quizup-organization/quizup-sdk/compare/v2.4.3...v2.4.4) (2026-09-24)
 
 ### Bug Fixes
