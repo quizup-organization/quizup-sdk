@@ -2,14 +2,12 @@ package io.github.quizup.microservice.core.domain.exception;
 
 import io.github.quizup.microservice.core.domain.model.search.FieldType;
 import io.github.quizup.microservice.core.domain.model.search.FilterOperator;
-import io.github.quizup.microservice.core.domain.model.search.SearchCriteria;
-import io.github.quizup.microservice.core.domain.exception.ProblemCategory;
 
 import java.util.Map;
 
 /**
  * Exceptions de validation liées à la recherche dynamique.
- * Levées lorsqu'un {@link SearchCriteria}
+ * Levées lorsqu'un {@code SearchRequest}
  * contient des filtres ou tris invalides par rapport au descripteur de l'entité recherchable.
  */
 public interface SearchValidationProblems {

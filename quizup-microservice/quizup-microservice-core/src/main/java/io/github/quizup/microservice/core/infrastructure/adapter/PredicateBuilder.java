@@ -1,6 +1,6 @@
 package io.github.quizup.microservice.core.infrastructure.adapter;
 
-import io.github.quizup.microservice.core.domain.model.search.FilterCriteria;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.FilterRequest;
 import io.github.quizup.microservice.core.domain.model.search.FilterOperator;
 import io.github.quizup.microservice.core.domain.model.search.SearchableField;
 import io.github.quizup.microservice.core.domain.model.search.FieldType;
@@ -35,13 +35,13 @@ public interface PredicateBuilder {
      * @param filter          le critère de filtrage complet (property, operator, value, valueTo, values)
      * @return le nouveau prédicat combiné
      */
-    <T> Predicate build(Root<T> root, CriteriaBuilder criteriaBuilder, Predicate predicate, SearchableField field, FilterCriteria filter);
+    <T> Predicate build(Root<T> root, CriteriaBuilder criteriaBuilder, Predicate predicate, SearchableField field, FilterRequest filter);
 
     // ─── Implémentations ────────────────────────────────────────────────
 
     class EqualsPredicateBuilder implements PredicateBuilder {
         @Override
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             Object value = ValueResolver.resolve(filter.value(), field.type());
             return cb.and(predicate, cb.equal(root.get(field.key()), value));
         }
@@ -49,7 +49,7 @@ public interface PredicateBuilder {
 
     class NotEqualsPredicateBuilder implements PredicateBuilder {
         @Override
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             Object value = ValueResolver.resolve(filter.value(), field.type());
             return cb.and(predicate, cb.notEqual(root.get(field.key()), value));
         }
@@ -58,7 +58,7 @@ public interface PredicateBuilder {
     class LessThanPredicateBuilder implements PredicateBuilder {
         @Override
         @SuppressWarnings("unchecked")
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             Object value = ValueResolver.resolve(filter.value(), field.type());
             return switch (field.type()) {
                 case DATE -> {
@@ -80,7 +80,7 @@ public interface PredicateBuilder {
     class GreaterThanPredicateBuilder implements PredicateBuilder {
         @Override
         @SuppressWarnings("unchecked")
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             Object value = ValueResolver.resolve(filter.value(), field.type());
             return switch (field.type()) {
                 case DATE -> {
@@ -101,7 +101,7 @@ public interface PredicateBuilder {
 
     class ContainsPredicateBuilder implements PredicateBuilder {
         @Override
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             String value = String.valueOf(filter.value()).toLowerCase();
             return cb.and(predicate, cb.like(cb.lower(root.get(field.key())), "%" + value + "%"));
         }
@@ -109,7 +109,7 @@ public interface PredicateBuilder {
 
     class NotContainsPredicateBuilder implements PredicateBuilder {
         @Override
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             String value = String.valueOf(filter.value()).toLowerCase();
             return cb.and(predicate, cb.notLike(cb.lower(root.get(field.key())), "%" + value + "%"));
         }
@@ -117,7 +117,7 @@ public interface PredicateBuilder {
 
     class StartsWithPredicateBuilder implements PredicateBuilder {
         @Override
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             String value = String.valueOf(filter.value()).toLowerCase();
             return cb.and(predicate, cb.like(cb.lower(root.get(field.key())), value + "%"));
         }
@@ -125,7 +125,7 @@ public interface PredicateBuilder {
 
     class EndsWithPredicateBuilder implements PredicateBuilder {
         @Override
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             String value = String.valueOf(filter.value()).toLowerCase();
             return cb.and(predicate, cb.like(cb.lower(root.get(field.key())), "%" + value));
         }
@@ -133,7 +133,7 @@ public interface PredicateBuilder {
 
     class InPredicateBuilder implements PredicateBuilder {
         @Override
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             List<Object> values = ValueResolver.resolveAll(filter.values(), field.type());
             return cb.and(predicate, root.get(field.key()).in(values));
         }
@@ -141,7 +141,7 @@ public interface PredicateBuilder {
 
     class NotInPredicateBuilder implements PredicateBuilder {
         @Override
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             List<Object> values = ValueResolver.resolveAll(filter.values(), field.type());
             return cb.and(predicate, cb.not(root.get(field.key()).in(values)));
         }
@@ -150,7 +150,7 @@ public interface PredicateBuilder {
     class BetweenPredicateBuilder implements PredicateBuilder {
         @Override
         @SuppressWarnings("unchecked")
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             Object from = ValueResolver.resolve(filter.value(), field.type());
             Object to = ValueResolver.resolve(filter.valueTo(), field.type());
             return switch (field.type()) {
@@ -172,7 +172,7 @@ public interface PredicateBuilder {
 
     class BlankPredicateBuilder implements PredicateBuilder {
         @Override
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             Predicate isNull = cb.isNull(root.get(field.key()));
             if (field.type() == FieldType.STRING) {
                 Predicate isEmpty = cb.equal(root.get(field.key()), "");
@@ -184,7 +184,7 @@ public interface PredicateBuilder {
 
     class NotBlankPredicateBuilder implements PredicateBuilder {
         @Override
-        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterCriteria filter) {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, Predicate predicate, SearchableField field, FilterRequest filter) {
             Predicate isNotNull = cb.isNotNull(root.get(field.key()));
             if (field.type() == FieldType.STRING) {
                 Predicate isNotEmpty = cb.notEqual(root.get(field.key()), "");

@@ -1,7 +1,7 @@
 package io.github.quizup.microservice.core.infrastructure.adapter;
 
-import io.github.quizup.microservice.core.domain.model.search.FilterCriteria;
-import io.github.quizup.microservice.core.domain.model.search.SearchCriteria;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.FilterRequest;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
 import io.github.quizup.microservice.core.domain.model.search.SearchableEntity;
 import io.github.quizup.microservice.core.domain.model.search.SearchableField;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -13,16 +13,16 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 /**
- * Convertit un {@link SearchCriteria} en {@link Specification} JPA
+ * Convertit un {@link SearchRequest} en {@link Specification} JPA
  * en utilisant le {@link SearchableEntity} pour la résolution des champs
  * et le registry de {@link PredicateBuilder} pour la construction des prédicats.
  */
-public class SearchCriteriaSpecification<T> implements Specification<T> {
+public class SearchRequestSpecification<T> implements Specification<T> {
 
-    private final SearchCriteria criteria;
+    private final SearchRequest criteria;
     private final SearchableEntity searchableEntity;
 
-    public SearchCriteriaSpecification(SearchCriteria criteria, SearchableEntity searchableEntity) {
+    public SearchRequestSpecification(SearchRequest criteria, SearchableEntity searchableEntity) {
         this.criteria = criteria;
         this.searchableEntity = searchableEntity;
     }
@@ -36,7 +36,7 @@ public class SearchCriteriaSpecification<T> implements Specification<T> {
             return predicate;
         }
 
-        for (FilterCriteria filter : criteria.filters()) {
+        for (FilterRequest filter : criteria.filters()) {
 
             SearchableField field = searchableEntity.getByKey(filter.property());
 

@@ -30,13 +30,8 @@ public interface QueryResponseTypes {
         return new RawMultipleInstancesResponseType<>(type);
     }
 
-    /** Résultat de recherche paginé de bus. */
-    static <R> PageResultResponseType<R> pageResultOf(Class<R> type) {
-        return new PageResultResponseType<>(type);
-    }
-
-    /** Résultat de recherche paginé de transport (REST). */
-    static <R> PageResponseResponseType<R> pageResponseOf(Class<R> type) {
-        return new PageResponseResponseType<>(type);
+    /** Résultat de recherche paginé (DTO de transport {@code SearchResponse}). */
+    static <R> SearchResponseType<R> searchResponseOf(Class<R> type) {
+        return new SearchResponseType<>(type);
     }
 }

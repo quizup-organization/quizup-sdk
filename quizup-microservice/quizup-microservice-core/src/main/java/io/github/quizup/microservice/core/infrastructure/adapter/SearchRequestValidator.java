@@ -1,18 +1,24 @@
-package io.github.quizup.microservice.core.domain.validator;
+package io.github.quizup.microservice.core.infrastructure.adapter;
 
 import io.github.quizup.microservice.core.domain.exception.SearchValidationProblems;
-import io.github.quizup.microservice.core.domain.model.search.*;
+import io.github.quizup.microservice.core.domain.model.search.FieldType;
+import io.github.quizup.microservice.core.domain.model.search.FilterOperator;
+import io.github.quizup.microservice.core.domain.model.search.SearchableEntity;
+import io.github.quizup.microservice.core.domain.model.search.SearchableField;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.FilterRequest;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SortRequest;
 
 import java.util.EnumSet;
 import java.util.Set;
 
 /**
- * Validateur de {@link SearchCriteria} par rapport à un {@link SearchableEntity}.
+ * Validateur de {@link SearchRequest} par rapport à un {@link SearchableEntity}.
  * Vérifie que les filtres et tris référencent des champs existants,
  * que les opérateurs sont compatibles avec les types de champs,
  * et que les valeurs requises sont présentes.
  */
-public final class SearchCriteriaValidator {
+public final class SearchRequestValidator {
 
     /** Opérateurs réservés aux champs texte */
     private static final Set<FilterOperator> STRING_ONLY_OPERATORS = EnumSet.of(
@@ -29,11 +35,11 @@ public final class SearchCriteriaValidator {
             FilterOperator.BETWEEN
     );
 
-    private SearchCriteriaValidator() {
+    private SearchRequestValidator() {
     }
 
     /**
-     * Valide un {@link SearchCriteria} par rapport au descripteur de l'entité recherchable.
+     * Valide un {@link SearchRequest} par rapport au descripteur de l'entité recherchable.
      *
      * @param entity   le descripteur de l'entité (champs autorisés)
      * @param criteria les critères de recherche à valider
@@ -41,21 +47,21 @@ public final class SearchCriteriaValidator {
      * @throws SearchValidationProblems.IncompatibleOperatorProblem si un opérateur est incompatible avec le type
      * @throws SearchValidationProblems.MissingValueProblem        si une valeur requise est absente
      */
-    public static void validate(SearchableEntity entity, SearchCriteria criteria) {
+    public static void validate(SearchableEntity entity, SearchRequest criteria) {
         if (criteria.filters() != null) {
-            for (FilterCriteria filter : criteria.filters()) {
+            for (FilterRequest filter : criteria.filters()) {
                 validateFilter(entity, filter);
             }
         }
 
         if (criteria.sorts() != null) {
-            for (SortCriteria sort : criteria.sorts()) {
+            for (SortRequest sort : criteria.sorts()) {
                 validateSort(entity, sort);
             }
         }
     }
 
-    private static void validateFilter(SearchableEntity entity, FilterCriteria filter) {
+    private static void validateFilter(SearchableEntity entity, FilterRequest filter) {
         String fieldKey = filter.property();
         FilterOperator operator = filter.operator();
 
@@ -84,7 +90,7 @@ public final class SearchCriteriaValidator {
         }
     }
 
-    private static void validateRequiredValues(String fieldKey, FilterOperator operator, FilterCriteria filter) {
+    private static void validateRequiredValues(String fieldKey, FilterOperator operator, FilterRequest filter) {
         switch (operator) {
             case BETWEEN -> {
                 if (filter.value() == null) {
@@ -110,7 +116,7 @@ public final class SearchCriteriaValidator {
         }
     }
 
-    private static void validateSort(SearchableEntity entity, SortCriteria sort) {
+    private static void validateSort(SearchableEntity entity, SortRequest sort) {
         String fieldKey = sort.property();
         entity.findByKey(fieldKey)
                 .orElseThrow(() -> new SearchValidationProblems.UnknownFieldProblem(fieldKey));

@@ -1,6 +1,6 @@
 package io.github.quizup.microservice.core.infrastructure.axon;
 
-import io.github.quizup.microservice.core.infrastructure.in.api.response.PageResponse;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import org.axonframework.messaging.responsetypes.AbstractResponseType;
 
 import java.lang.reflect.ParameterizedType;
@@ -9,9 +9,9 @@ import java.util.concurrent.Future;
 
 import static org.axonframework.common.ReflectionUtils.unwrapIfType;
 
-public class PageResponseResponseType<R> extends AbstractResponseType<PageResponse<R>> {
+public class SearchResponseType<R> extends AbstractResponseType<SearchResponse<R>> {
 
-    public PageResponseResponseType(Class<R> expectedResponseType) {
+    public SearchResponseType(Class<R> expectedResponseType) {
         super(expectedResponseType);
     }
 
@@ -22,14 +22,14 @@ public class PageResponseResponseType<R> extends AbstractResponseType<PageRespon
         if (unwrapped instanceof ParameterizedType parameterized) {
             Type rawType = parameterized.getRawType();
             if (rawType instanceof Class<?> rawClass
-                    && PageResponse.class.isAssignableFrom(rawClass)) {
+                    && SearchResponse.class.isAssignableFrom(rawClass)) {
                 Type[] args = parameterized.getActualTypeArguments();
                 return args.length == 1 && isAssignableFrom(args[0]);
             }
         }
 
         if (unwrapped instanceof Class<?> rawClass) {
-            return PageResponse.class.isAssignableFrom(rawClass);
+            return SearchResponse.class.isAssignableFrom(rawClass);
         }
 
         return false;
@@ -38,12 +38,12 @@ public class PageResponseResponseType<R> extends AbstractResponseType<PageRespon
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Class responseMessagePayloadType() {
-        return PageResponse.class;
+        return SearchResponse.class;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public PageResponse<R> convert(Object response) {
-        return (PageResponse<R>) response;
+    public SearchResponse<R> convert(Object response) {
+        return (SearchResponse<R>) response;
     }
 }
