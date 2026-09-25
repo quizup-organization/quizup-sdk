@@ -1,3 +1,9 @@
+## [3.0.1](https://github.com/quizup-organization/quizup-sdk/compare/v3.0.0...v3.0.1) (2026-09-25)
+
+### Bug Fixes
+
+* **sdk:** keep Optional responses over the query bus and map remote problems ([985d589](https://github.com/quizup-organization/quizup-sdk/commit/985d589d179aebeb4c86e21165e0cca94f324b9a)), closes [OptionalResponseType#forSerialization](https://github.com/quizup-organization/OptionalResponseType/issues/forSerialization)
+
 ## [3.0.0](https://github.com/quizup-organization/quizup-sdk/compare/v2.4.5...v3.0.0) (2026-09-25)
 
 ### ⚠ BREAKING CHANGES
