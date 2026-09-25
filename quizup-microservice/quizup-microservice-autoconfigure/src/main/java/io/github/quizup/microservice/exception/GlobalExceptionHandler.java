@@ -1,5 +1,6 @@
 package io.github.quizup.microservice.exception;
 
+import io.github.quizup.microservice.core.domain.exception.BaseProblem;
 import io.github.quizup.microservice.core.domain.exception.ProblemCategory;
 import io.github.quizup.microservice.core.infrastructure.in.api.response.ExceptionResponse;
 import io.github.quizup.microservice.MicroserviceProperties;
@@ -187,6 +188,35 @@ public class GlobalExceptionHandler {
 
     @SuppressWarnings("unchecked")
     private ResponseEntity<ExceptionResponse> handleHandlerExecutionException(HandlerExecutionException ex, HttpServletRequest request) {
+        // Over the distributed bus, the structured Problem details are lost: Axon only transports the
+        // exception type + message + cause chain. Unwrap the cause chain to recover the original
+        // BaseProblem and map its category to the right HTTP status (e.g. NOT_FOUND) instead of a 500.
+        Optional<BaseProblem> problemOpt = findBaseProblem(ex);
+        if (problemOpt.isPresent()) {
+            BaseProblem problem = problemOpt.get();
+            HttpStatus httpStatus = statusForCategory(problem.getCategory());
+
+            ExceptionResponse response = new ExceptionResponse(
+                    problem.getType(),
+                    problem.getCategory(),
+                    problem.getTitle(),
+                    problem.getDetail(),
+                    problem.getContext(),
+                    httpStatus.value(),
+                    request.getRequestURI()
+            );
+
+            if (properties.logStackTrace()) {
+                logger.error("handler execution problem: type={}, category={}", problem.getType(),
+                        problem.getCategory(), ex);
+            } else {
+                logger.error("handler execution problem: type={}, category={}, message={}",
+                        problem.getType(), problem.getCategory(), problem.getDetail());
+            }
+
+            return buildResponse(response, httpStatus);
+        }
+
         Optional<Map<String, Object>> detailsOpt = ex.getDetails()
                 .filter(details -> details instanceof Map)
                 .map(details -> (Map<String, Object>) details);
@@ -253,6 +283,37 @@ public class GlobalExceptionHandler {
         );
 
         return buildResponse(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Reconstruit le {@link BaseProblem} d'origine en parcourant la chaîne de causes. Indispensable
+     * pour les exceptions issues du bus distribué, où seuls le type, le message et la cause sont
+     * transportés (les détails structurés ne survivent pas).
+     */
+    private Optional<BaseProblem> findBaseProblem(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof BaseProblem problem) {
+                return Optional.of(problem);
+            }
+            if (current.getCause() == current) {
+                break;
+            }
+            current = current.getCause();
+        }
+        return Optional.empty();
+    }
+
+    private HttpStatus statusForCategory(ProblemCategory category) {
+        if (category == null) {
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return switch (category) {
+            case BUSINESS_INVALID_COMMAND, VALIDATION -> HttpStatus.BAD_REQUEST;
+            case PERMISSION -> HttpStatus.FORBIDDEN;
+            case BUSINESS_RESOURCE_MISSING -> HttpStatus.NOT_FOUND;
+            case BUSINESS_AGGREGATE, TECHNICAL -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
     }
 
 }

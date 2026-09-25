@@ -1,8 +1,10 @@
 package io.github.quizup.microservice.exception;
 
 import io.github.quizup.microservice.MicroserviceProperties;
+import io.github.quizup.microservice.core.domain.exception.BaseProblem;
 import io.github.quizup.microservice.core.domain.exception.ProblemCategory;
 import io.github.quizup.microservice.core.infrastructure.in.api.response.ExceptionResponse;
+import org.axonframework.queryhandling.QueryExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -13,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -69,5 +73,58 @@ class GlobalExceptionHandlerTest {
 
         assertThat(response.getStatusCode().value()).isEqualTo(500);
         assertThat(response.getBody().type()).isEqualTo("internal-server-error");
+    }
+
+    @Test
+    void remoteResourceMissingProblemShouldMapTo404() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/topic-follows/missing");
+        QueryExecutionException ex = new QueryExecutionException(
+                "The remote query handler threw an exception",
+                new TestProblem("topic-follow-not-found", ProblemCategory.BUSINESS_RESOURCE_MISSING),
+                null
+        );
+
+        ResponseEntity<ExceptionResponse> response = handler.handleQueryExecutionException(ex, request);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(404);
+        assertThat(response.getBody().type()).isEqualTo("topic-follow-not-found");
+        assertThat(response.getBody().category()).isEqualTo(ProblemCategory.BUSINESS_RESOURCE_MISSING);
+        assertThat(response.getBody().status()).isEqualTo(404);
+    }
+
+    @Test
+    void remoteInvalidCommandProblemShouldMapTo400() {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/topic-follows");
+        QueryExecutionException ex = new QueryExecutionException(
+                "The remote command handler threw an exception",
+                new TestProblem("cannot-follow-self", ProblemCategory.BUSINESS_INVALID_COMMAND),
+                null
+        );
+
+        ResponseEntity<ExceptionResponse> response = handler.handleQueryExecutionException(ex, request);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(400);
+        assertThat(response.getBody().type()).isEqualTo("cannot-follow-self");
+    }
+
+    @Test
+    void remoteHandlingExceptionWithoutProblemShouldStillReturn500() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/boom");
+        QueryExecutionException ex = new QueryExecutionException(
+                "The remote query handler threw an exception",
+                new RuntimeException("remote boom"),
+                null
+        );
+
+        ResponseEntity<ExceptionResponse> response = handler.handleQueryExecutionException(ex, request);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(500);
+    }
+
+    static class TestProblem extends BaseProblem {
+
+        TestProblem(String type, ProblemCategory category) {
+            super(type, category, "title", "detail", Map.of("key", "value"));
+        }
     }
 }

@@ -52,7 +52,7 @@ public class DispatchQueryMessage implements Serializable {
         this.payloadRevision = payload.getType().getRevision();
         this.serializedPayload = payload.getData();
 
-        ResponseType<?> forSerialization = queryMessage.getResponseType().forSerialization();
+        ResponseType<?> forSerialization = ResponseTypeWire.forSerialization(queryMessage.getResponseType());
         SerializedObject<byte[]> responseType = serializer.serialize(forSerialization, byte[].class);
         this.responseTypeType = responseType.getType().getName();
         this.responseTypeRevision = responseType.getType().getRevision();

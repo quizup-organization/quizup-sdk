@@ -16,8 +16,8 @@ Fournir à tous les microservices QuizUp :
 - une **auto-configuration Spring Boot** (CORS, Swagger, Security, WebSocket, Actuator,
   **Observabilité** Prometheus/Micrometer, PasswordEncoder, exception handler)
 - des **types domaine partagés** (`microservice-core`) : exceptions (`BaseProblem`,
-  `ProblemCategory`), types de recherche (`SearchCriteria`, `PageResult`, `FilterCriteria`,
-  `SortCriteria`), mappers, etc.
+  `ProblemCategory`), DTO de recherche/transport (`SearchRequest`, `FilterRequest`,
+  `SortRequest`, `PageRequest` → `SearchResponse<T>`), etc.
 - un **starter Axon distribué** (RabbitMQ, deadlines, distributed query)
 
 **Package racine** : `io.github.quizup`
@@ -163,14 +163,18 @@ Packages sous `io.github.quizup.microservice.core.domain.*` :
 
 - **`exception`** : `BaseProblem`, `ProblemCategory` — base de toutes les exceptions métier
 - **`constant`** : `QuizUpConstants` — identifiant et email du compte système unique (`SYSTEM_USER_ID`, `SYSTEM_USER_EMAIL`, `SYSTEM_USER_NAME`)
-- **`model.search`** : `SearchCriteria`, `PageResult<T>`, `FilterCriteria`, `SortCriteria`, `PageCriteria`,
-  `SearchQuery`, `PageResponse<T>`
+- **`model.search`** (metadata technique) : `FilterOperator`, `SortDirection`, `FieldType`,
+  `Searchable`/`SearchableEntity`/`SearchableField`. **Aucun modèle de pagination custom** : les DTO
+  de recherche (`SearchRequest`/`FilterRequest`/`SortRequest`/`PageRequest` → `SearchResponse<T>`)
+  vivent sous `infrastructure.in.api.request`/`response` et sont l'unique représentation
+  échangée (REST **et** bus). Ils n'implémentent plus d'interface domaine et ne portent aucune
+  annotation Jackson technique.
 - **`model.notification`** : `NotificationEnvelope<T>` — enveloppe commune des notifications temps réel
   (`notificationId`, `aggregateId`, `sequenceNumber`, `occurredAt`, `payload`), partagée par l'historique
   REST et le push WebSocket (permettre au client de folder l'état de façon déterministe)
 - **`infrastructure.axon`** : `QueryResponseTypes` — **factory unique** des `ResponseType` de queries (`instanceOf`,
-  `optionalInstanceOf`, `multipleInstancesOf`, `pageResultOf`, `pageResponseOf`). **Règle** : les services ne doivent
-  plus utiliser `ResponseTypes`/`PageResponseTypes` d'Axon
+  `optionalInstanceOf`, `multipleInstancesOf`, `searchResponseOf`). **Règle** : les services ne doivent
+  plus utiliser `ResponseTypes` d'Axon
   directement. `multipleInstancesOf` s'appuie sur `RawMultipleInstancesResponseType`, qui matche le **type brut** de
   l'élément de liste et corrige le cas `List<NotificationEnvelope<Event>>` (qu'Axon
   natif ne résout pas → `NoHandlerForQueryException`)

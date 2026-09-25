@@ -63,7 +63,7 @@ public class AxonDistributedActivityMetricsAutoConfiguration {
      * (évite toute initialisation précoce des composants Axon).
      */
     @Bean
-    ApplicationListener<ApplicationReadyEvent> quizupAxonEventProcessorGauges(
+    public ApplicationListener<ApplicationReadyEvent> quizupAxonEventProcessorGauges(
             ObjectProvider<MeterRegistry> registries,
             ObjectProvider<Configuration> configurationProvider) {
         return event -> {

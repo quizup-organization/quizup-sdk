@@ -6,6 +6,7 @@ import org.axonframework.messaging.RemoteExceptionDescription;
 import org.axonframework.messaging.RemoteHandlingException;
 import org.axonframework.messaging.RemoteNonTransientHandlingException;
 import org.axonframework.messaging.responsetypes.MultipleInstancesResponseType;
+import org.axonframework.messaging.responsetypes.OptionalResponseType;
 import org.axonframework.messaging.responsetypes.ResponseType;
 import org.axonframework.queryhandling.GenericQueryResponseMessage;
 import org.axonframework.queryhandling.QueryExecutionException;
@@ -20,6 +21,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Wire representation of a {@link QueryResponseMessage} sent back over the internal HTTP query
@@ -73,7 +75,7 @@ public class ReplyQueryMessage implements Serializable {
         this.exceptionType = exception.getType().getName();
         this.exceptionRevision = exception.getType().getRevision();
 
-        ResponseType<?> forSerialization = (responseType == null) ? null : responseType.forSerialization();
+        ResponseType<?> forSerialization = ResponseTypeWire.forSerialization(responseType);
         if (forSerialization != null) {
             SerializedObject<byte[]> rt = serializer.serialize(forSerialization, byte[].class);
             this.serializedResponseType = rt.getData();
@@ -132,6 +134,12 @@ public class ReplyQueryMessage implements Serializable {
     private static Object adaptPayloadForTransport(Object payload, ResponseType<?> responseType) {
         if (payload == null || responseType == null) {
             return payload;
+        }
+        if (responseType instanceof OptionalResponseType<?>) {
+            // Unwrap so the element (not the Optional) is serialized with its concrete type;
+            // an empty Optional yields null and is rebuilt by OptionalResponseType#convert on the
+            // caller side.
+            return (payload instanceof Optional<?> optional) ? optional.orElse(null) : payload;
         }
         if (responseType instanceof MultipleInstancesResponseType<?>) {
             Class<?> elementType = responseType.getExpectedResponseType();

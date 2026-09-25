@@ -16,9 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.concurrent.CompletionException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Prouve la limite d'Axon et le correctif SDK pour les queries retournant une liste d'éléments
@@ -50,10 +48,7 @@ class MultipleInstancesQueryMatchingTest {
                 () -> queryBus.query(query).join()
         );
 
-        assertTrue(
-                failure.getCause() instanceof NoHandlerForQueryException,
-                "Axon ne doit pas résoudre un handler de List<Wrapper<Payload>> via multipleInstancesOf"
-        );
+        assertInstanceOf(NoHandlerForQueryException.class, failure.getCause(), "Axon ne doit pas résoudre un handler de List<Wrapper<Payload>> via multipleInstancesOf");
     }
 
     @Test
