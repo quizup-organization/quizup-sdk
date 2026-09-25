@@ -1,3 +1,13 @@
+## [3.0.0](https://github.com/quizup-organization/quizup-sdk/compare/v2.4.5...v3.0.0) (2026-09-25)
+
+### ⚠ BREAKING CHANGES
+
+* **sdk:** replace custom pagination model with core SearchRequest/SearchResponse DTOs
+
+### Features
+
+* **sdk:** replace custom pagination model with core SearchRequest/SearchResponse DTOs ([07c9487](https://github.com/quizup-organization/quizup-sdk/commit/07c94876738ceffb25e49238da8d6c4e19ce5e84))
+
 ## [2.4.5](https://github.com/quizup-organization/quizup-sdk/compare/v2.4.4...v2.4.5) (2026-09-24)
 
 ### Reverts
