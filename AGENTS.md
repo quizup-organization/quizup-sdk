@@ -169,14 +169,23 @@ Packages sous `io.github.quizup.microservice.core.domain.*` :
   vivent sous `infrastructure.in.api.request`/`response` et sont l'unique représentation
   échangée (REST **et** bus). Ils n'implémentent plus d'interface domaine et ne portent aucune
   annotation Jackson technique.
-- **`model.notification`** : `NotificationEnvelope<T>` — enveloppe commune des notifications temps réel
-  (`notificationId`, `aggregateId`, `sequenceNumber`, `occurredAt`, `payload`), partagée par l'historique
-  REST et le push WebSocket (permettre au client de folder l'état de façon déterministe)
+- **`model.notification`** : `EventEnvelope` — enveloppe d'événement **auto-descriptive** partagée
+  par l'historique REST et le push WebSocket/query bus : `aggregateId`, `sequenceNumber`,
+  `timestamp`, `eventType` (FQCN du payload, dérivé par `EventEnvelope.of(...)`), `payload`
+  (`Object`, sans annotation framework). Les modules `domain/` des services restent purs.
+  - Le codec `EventEnvelopeModule` (`quizup-axon-query`) sérialise/désérialise le payload avec son
+    **type concret** à partir d'`eventType`, restreint à l'allowlist `io.github.quizup.`
+    (fail-closed). Il n'est enregistré que dans le **serializer dédié du query bus distribué**
+    (`distributedQuerySerializer`, cf. `AxonDistributedQueryAutoConfiguration`) ; les serializers
+    Axon général/message/event et le format de l'event store sont inchangés.
+  - Le contrat exposé au web n'est **pas** cette enveloppe : le BFF possède son propre
+    `EventEnvelopeResponse` (annotations Jackson du contrat web, `eventType` = type web).
+  - Format wire du query bus non rétro-compatible : déploiement coordonné requis.
 - **`infrastructure.axon`** : `QueryResponseTypes` — **factory unique** des `ResponseType` de queries (`instanceOf`,
   `optionalInstanceOf`, `multipleInstancesOf`, `searchResponseOf`). **Règle** : les services ne doivent
   plus utiliser `ResponseTypes` d'Axon
   directement. `multipleInstancesOf` s'appuie sur `RawMultipleInstancesResponseType`, qui matche le **type brut** de
-  l'élément de liste et corrige le cas `List<NotificationEnvelope<Event>>` (qu'Axon
+  l'élément de liste et corrige le cas `List<EventEnvelope>` (qu'Axon
   natif ne résout pas → `NoHandlerForQueryException`)
 - **`model.security`** : `QuizUpPrincipal` (contexte JWT)
 - **`port.out`** : ports sortants partagés

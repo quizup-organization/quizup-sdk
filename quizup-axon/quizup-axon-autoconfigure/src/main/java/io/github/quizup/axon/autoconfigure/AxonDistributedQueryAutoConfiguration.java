@@ -1,13 +1,17 @@
 package io.github.quizup.axon.autoconfigure;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.quizup.axon.query.HttpQueryBusConnector;
 import io.github.quizup.axon.query.QueryCapabilityRegistry;
 import io.github.quizup.axon.query.SpringCloudDistributedQueryBus;
 import io.github.quizup.axon.query.SpringCloudQueryRouter;
 import io.github.quizup.axon.query.api.QueryCapabilitiesController;
 import io.github.quizup.axon.query.api.QueryTransportController;
+import io.github.quizup.axon.query.message.EventEnvelopeModule;
 import org.axonframework.queryhandling.QueryBus;
+import org.axonframework.serialization.RevisionResolver;
 import org.axonframework.serialization.Serializer;
+import org.axonframework.serialization.json.JacksonSerializer;
 import org.axonframework.springboot.autoconfig.AxonAutoConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -39,10 +43,27 @@ public class AxonDistributedQueryAutoConfiguration {
         });
     }
 
+    /**
+     * Serializer dédié au query bus distribué : copie de l'{@link ObjectMapper} applicatif enrichie
+     * du codec {@link EventEnvelopeModule} (payload typé via {@code eventType}). Il est détenu hors
+     * du type {@link Serializer} pour ne pas perturber les conditions d'Axon sur les serializers
+     * général/message/event, qui restent inchangés (format event store préservé).
+     */
+    @Bean
+    public DistributedQuerySerializer distributedQuerySerializer(ObjectMapper objectMapper,
+                                                                 RevisionResolver revisionResolver) {
+        ObjectMapper queryObjectMapper = objectMapper.copy();
+        queryObjectMapper.registerModule(new EventEnvelopeModule());
+        return new DistributedQuerySerializer(JacksonSerializer.builder()
+                .objectMapper(queryObjectMapper)
+                .revisionResolver(revisionResolver)
+                .build());
+    }
+
     @Bean
     public HttpQueryBusConnector httpQueryBusConnector(RestTemplate restTemplate,
-                                                       Serializer serializer) {
-        return new HttpQueryBusConnector(restTemplate, serializer);
+                                                       DistributedQuerySerializer querySerializer) {
+        return new HttpQueryBusConnector(restTemplate, querySerializer.serializer());
     }
 
     @Bean
@@ -71,8 +92,14 @@ public class AxonDistributedQueryAutoConfiguration {
 
     @Bean
     public QueryTransportController queryTransportController(@Qualifier("localSegment") QueryBus localQueryBus,
-                                                             Serializer serializer) {
-        return new QueryTransportController(localQueryBus, serializer);
+                                                             DistributedQuerySerializer querySerializer) {
+        return new QueryTransportController(localQueryBus, querySerializer.serializer());
     }
 
+    /**
+     * Détient le serializer du query bus distribué sans exposer un bean {@link Serializer}
+     * supplémentaire (les serializers Axon général/message/event ne sont pas impactés).
+     */
+    public record DistributedQuerySerializer(Serializer serializer) {
+    }
 }
