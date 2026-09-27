@@ -1,3 +1,13 @@
+## [4.0.0](https://github.com/quizup-organization/quizup-sdk/compare/v3.0.1...v4.0.0) (2026-09-27)
+
+### ⚠ BREAKING CHANGES
+
+* **sdk:** EventEnvelope transport for the distributed query bus
+
+### Features
+
+* **sdk:** EventEnvelope transport for the distributed query bus ([889f41f](https://github.com/quizup-organization/quizup-sdk/commit/889f41f177738031a76ae8d6cf21a91d979d278f))
+
 ## [3.0.1](https://github.com/quizup-organization/quizup-sdk/compare/v3.0.0...v3.0.1) (2026-09-25)
 
 ### Bug Fixes
