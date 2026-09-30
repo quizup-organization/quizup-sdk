@@ -161,8 +161,14 @@ Les services QuizUp utilisent **deux** buses distribués, **tous deux** fournis 
 
 Packages sous `io.github.quizup.microservice.core.domain.*` :
 
-- **`exception`** : `BaseProblem`, `ProblemCategory` — base de toutes les exceptions métier
+- **`exception`** : `BaseProblem`, `ProblemCategory` — base de toutes les exceptions métier ;
+  familles de `Problem` par domaine (`SearchableProblems`, `SearchValidationProblems`,
+  `LanguageProblems`…). **Règle** : jamais de `throw new RuntimeException`/`IllegalArgumentException`
+  dans le code métier — toujours un `Problem`.
 - **`constant`** : `QuizUpConstants` — identifiant et email du compte système unique (`SYSTEM_USER_ID`, `SYSTEM_USER_EMAIL`, `SYSTEM_USER_NAME`)
+- **`model.i18n`** : `Language` (`fr`/`en`, code ISO 639-1, sérialisé/désérialisé strictement via
+  `@JsonValue`/`@JsonCreator`) — langue partagée entre profil (préférence) et contenu (questions).
+  Code inconnu ⇒ `LanguageProblems.UnsupportedLanguageProblem` (400 côté REST).
 - **`model.search`** (metadata technique) : `FilterOperator`, `SortDirection`, `FieldType`,
   `Searchable`/`SearchableEntity`/`SearchableField`. **Aucun modèle de pagination custom** : les DTO
   de recherche (`SearchRequest`/`FilterRequest`/`SortRequest`/`PageRequest` → `SearchResponse<T>`)
