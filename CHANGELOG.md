@@ -1,3 +1,9 @@
+## [4.1.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.0.0...v4.1.0) (2026-09-30)
+
+### Features
+
+* **i18n:** shared Language type and language Problem ([7f46280](https://github.com/quizup-organization/quizup-sdk/commit/7f4628027e4a296a533adffdd38b0178b7bdf124))
+
 ## [4.0.0](https://github.com/quizup-organization/quizup-sdk/compare/v3.0.1...v4.0.0) (2026-09-27)
 
 ### ⚠ BREAKING CHANGES
