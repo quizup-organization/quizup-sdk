@@ -254,6 +254,6 @@ Kafka échappent partiellement au `MessageMonitor` :
   jauges d'état (`quizup.axon.event.processor.running|error`) sur `ApplicationReadyEvent`
   (les processors doivent être initialisés).
 
-**KPI métier** : les compteurs métier par service ont été **retirés** (voir `OBSERVABILITY.md`).
+**KPI métier** : les compteurs métier par service ont été **retirés** (voir `../../observability.md`).
 Si un besoin revient, exposer un **port hexagonal** par domaine (ex. `GameMetricsPort`) implémenté
 en infrastructure avec `MeterRegistry` (jamais d'import Micrometer dans `domain/`).
