@@ -31,6 +31,8 @@ spring:
               - uri: http://localhost:8088
             quizup-leaderboard:
               - uri: http://localhost:8091
+            quizup-notification:
+              - uri: http://localhost:8093
 
   security:
     oauth2:
