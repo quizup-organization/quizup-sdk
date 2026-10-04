@@ -1,3 +1,9 @@
+## [4.2.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.1.0...v4.2.0) (2026-10-04)
+
+### Features
+
+* **config:** add quizup-notification to local bus discovery ([e6138af](https://github.com/quizup-organization/quizup-sdk/commit/e6138af443cc6d98662d6dfcb98b1bf5bebe682a))
+
 ## [4.1.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.0.0...v4.1.0) (2026-09-30)
 
 ### Features
