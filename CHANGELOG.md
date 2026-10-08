@@ -1,3 +1,9 @@
+## [4.3.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.2.0...v4.3.0) (2026-10-08)
+
+### Features
+
+* **websocket:** heartbeats STOMP du broker (outgoing/incoming) ([7c268e3](https://github.com/quizup-organization/quizup-sdk/commit/7c268e3c3df1cb98c4a172c1775ef6509bca38c6))
+
 ## [4.2.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.1.0...v4.2.0) (2026-10-04)
 
 ### Features
