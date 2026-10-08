@@ -77,7 +77,7 @@ Préfixe de contrôle : `microservice:` (classe `MicroserviceProperties`).
 | `SwaggerRootRedirectAutoConfiguration` | —                                        | Redirection racine → Swagger                                                                               |
 | `ExceptionAutoConfiguration`           | `microservice.exception-handler.enabled` | Handler global + intercepteurs Axon (`ProblemCommandHandlerInterceptor`, `ProblemQueryHandlerInterceptor`) |
 | `ResourceServerAutoConfiguration`      | `microservice.resource-server.enabled`   | OAuth2 JWT (issuer + JWK)                                                                                  |
-| `WebSocketAutoConfiguration`           | `microservice.websocket.enabled`         | STOMP / SockJS + auth JWT de la trame `CONNECT` (`microservice.websocket.require-auth`, défaut `false`)    |
+| `WebSocketAutoConfiguration`           | `microservice.websocket.enabled`         | STOMP / SockJS + auth JWT de la trame `CONNECT` (`microservice.websocket.require-auth`, défaut `false`) + heartbeats broker (`heartbeat-outgoing`/`heartbeat-incoming`, 10 s, scheduler du broker) |
 | `ActuatorAutoConfiguration`            | `microservice.actuator.enabled`          | Spring Boot Actuator                                                                                       |
 | `ObservabilityAutoConfiguration`       | `microservice.observability.enabled`     | Tags communs des métriques Micrometer (`application`, `environment`, `version`) + registre Prometheus     |
 | `PasswordEncoderAutoConfiguration`     | —                                        | Bean `BCryptPasswordEncoder`                                                                               |

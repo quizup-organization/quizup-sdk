@@ -5,6 +5,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -55,6 +57,8 @@ class MicroservicePropertiesTest {
             assertThat(p.websocket().allowedOriginPatterns()).containsExactly("*");
             assertThat(p.websocket().withSockJs()).isTrue();
             assertThat(p.websocket().requireAuth()).isFalse();
+            assertThat(p.websocket().heartbeatOutgoing()).isEqualTo(Duration.ofSeconds(10));
+            assertThat(p.websocket().heartbeatIncoming()).isEqualTo(Duration.ofSeconds(10));
         });
     }
 
@@ -63,6 +67,7 @@ class MicroservicePropertiesTest {
         runner.withPropertyValues(
                         "microservice.cors.allowed-origins=https://a.example,https://b.example",
                         "microservice.websocket.enabled=false",
+                        "microservice.websocket.heartbeat-outgoing=30s",
                         "microservice.resource-server.jwt.jwk-set-uri=http://identity/oauth2/jwks")
                 .run(context -> {
                     MicroserviceProperties p = context.getBean(MicroserviceProperties.class);
@@ -70,6 +75,7 @@ class MicroservicePropertiesTest {
                     assertThat(p.cors().allowedOrigins())
                             .containsExactly("https://a.example", "https://b.example");
                     assertThat(p.websocket().enabled()).isFalse();
+                    assertThat(p.websocket().heartbeatOutgoing()).isEqualTo(Duration.ofSeconds(30));
                     assertThat(p.resourceServer().jwt().jwkSetUri()).isEqualTo("http://identity/oauth2/jwks");
                 });
     }

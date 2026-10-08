@@ -11,16 +11,25 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.messaging.simp.config.SimpleBrokerRegistration;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+
+import java.time.Duration;
 
 /**
  * Auto-configuration WebSocket STOMP partagée par tous les microservices.
  * <p>
  * Configure un message broker simple avec les destinations {@code /topic} et {@code /queue},
  * un préfixe applicatif {@code /app}, et un endpoint SockJS sur {@code /ws}.
+ * <p>
+ * Le broker porte des <b>heartbeats STOMP</b> ({@code heartbeat-outgoing} /
+ * {@code heartbeat-incoming}, 10 s par défaut) : un client silencieux (app suspendue, réseau
+ * coupé, half-open) est fermé par le broker après {@code max(client, serveur) × 3}, ce qui
+ * déclenche la déconnexion de session (et donc la présence hors ligne). {@code 0} désactive.
  * <p>
  * Activée par défaut, peut être désactivée avec :
  * <pre>
@@ -41,6 +50,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
  *     allowed-origin-patterns:
  *       - "*"
  *     with-sock-js: true
+ *     heartbeat-outgoing: 10s
+ *     heartbeat-incoming: 10s
  * </pre>
  */
 @AutoConfiguration
@@ -54,11 +65,14 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
 
     private final MicroserviceProperties.WebSocket wsProperties;
     private final ObjectProvider<JwtDecoder> jwtDecoderProvider;
+    private final ObjectProvider<TaskScheduler> taskSchedulerProvider;
 
     public WebSocketAutoConfiguration(MicroserviceProperties properties,
-                                      ObjectProvider<JwtDecoder> jwtDecoderProvider) {
+                                      ObjectProvider<JwtDecoder> jwtDecoderProvider,
+                                      ObjectProvider<TaskScheduler> taskSchedulerProvider) {
         this.wsProperties = properties.websocket();
         this.jwtDecoderProvider = jwtDecoderProvider;
+        this.taskSchedulerProvider = taskSchedulerProvider;
         logger.info("WebSocket auto-configuration enabled — endpoint: {}", wsProperties.endpoint());
     }
 
@@ -73,11 +87,30 @@ public class WebSocketAutoConfiguration implements WebSocketMessageBrokerConfigu
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         String[] destinations = wsProperties.brokerDestinations().toArray(String[]::new);
-        config.enableSimpleBroker(destinations);
+        var broker = config.enableSimpleBroker(destinations);
+        configureHeartbeats(broker);
         config.setApplicationDestinationPrefixes(wsProperties.applicationDestinationPrefix());
         logger.info("WebSocket broker destinations: {}, app prefix: {}",
                 wsProperties.brokerDestinations(),
                 wsProperties.applicationDestinationPrefix());
+    }
+
+    private void configureHeartbeats(SimpleBrokerRegistration broker) {
+        long outgoing = Math.max(0, wsProperties.heartbeatOutgoing().toMillis());
+        long incoming = Math.max(0, wsProperties.heartbeatIncoming().toMillis());
+        if (outgoing == 0 && incoming == 0) {
+            logger.info("WebSocket STOMP heartbeats disabled");
+            return;
+        }
+        TaskScheduler scheduler = taskSchedulerProvider.orderedStream().findFirst().orElse(null);
+        if (scheduler == null) {
+            logger.warn("WebSocket STOMP heartbeats configured but no TaskScheduler is available");
+            return;
+        }
+        broker.setTaskScheduler(scheduler);
+        broker.setHeartbeatValue(new long[] { outgoing, incoming });
+        logger.info("WebSocket STOMP heartbeats enabled: outgoing={}ms, incoming={}ms",
+                outgoing, incoming);
     }
 
     @Override

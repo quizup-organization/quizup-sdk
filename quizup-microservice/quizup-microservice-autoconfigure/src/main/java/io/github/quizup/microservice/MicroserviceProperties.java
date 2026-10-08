@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -129,6 +130,17 @@ public record MicroserviceProperties(
              * Whether STOMP CONNECT frames must carry a valid JWT. When {@code false}
              * (default), unauthenticated sessions are still accepted as anonymous.
              */
-            @DefaultValue("false") boolean requireAuth) {
+            @DefaultValue("false") boolean requireAuth,
+            /**
+             * Intervalle des heartbeats émis par le serveur vers le client (broker simple).
+             * Un client dont les heartbeats entrants s'arrêtent est déconnecté par le broker
+             * après {@code max(client, serveur) × 3}. {@code 0} désactive les heartbeats.
+             */
+            @DefaultValue("10s") Duration heartbeatOutgoing,
+            /**
+             * Intervalle attendu des heartbeats émis par le client (broker simple).
+             * {@code 0} désactive les heartbeats.
+             */
+            @DefaultValue("10s") Duration heartbeatIncoming) {
     }
 }
