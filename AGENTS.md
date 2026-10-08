@@ -4,7 +4,7 @@
 > de build 1) — doit être installé **avant** tous les services. Pas de code applicatif : c'est une
 > bibliothèque d'auto-configuration et de types partagés.
 > Pour les règles de patterns : [
-`../../best-practices/.backend/hexagonal-architecture.md`](../../best-practices/.backend/hexagonal-architecture.md).
+`../../best-practices/.backend/folder-structure.md`](../../best-practices/.backend/folder-structure.md).
 
 ---
 
