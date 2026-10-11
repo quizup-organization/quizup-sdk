@@ -1,3 +1,9 @@
+## [4.4.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.3.0...v4.4.0) (2026-10-11)
+
+### Features
+
+* **axon:** processing groups instance-scopés (fan-out temps réel multi-réplique) ([f5efacd](https://github.com/quizup-organization/quizup-sdk/commit/f5efacd441538185bcf09bc35d7ed99b3e8aaf5b))
+
 ## [4.3.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.2.0...v4.3.0) (2026-10-08)
 
 ### Features
