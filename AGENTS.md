@@ -119,6 +119,14 @@ Les services QuizUp utilisent **deux** buses distribués, **tous deux** fournis 
   `AxonDistributedEnvironmentPostProcessor` (property source `axonDistributedDefaultProperties`,
   `addLast` = priorité la plus basse). Les `axon.eventhandling.processors.*` ne sont que des **overrides
   ciblés** d'un groupe existant, jamais une déclaration de groupe.
+- **Groupes instance-scopés** (`quizup.axon.instance-scoped-groups`) : pour un service à **fan-out
+  temps réel multi-réplique** (BFF : chaque réplique ne connaît que ses clients STOMP), un processor
+  segmenté ne suffit pas — chaque instance doit consommer **tous** les événements.
+  `InstanceScopedProcessingGroupsAutoConfiguration` suffixe les groupes listés par l'id d'instance
+  (`<groupe>-<instanceId>`, défaut `HOSTNAME` = nom du pod) : chaque instance a son propre token et
+  démarre à la **queue** du flux (aucun replay Kafka pour un nouveau pod ; les clients complètent
+  l'historique via les folds REST). Les noms de processors sont donc suffixés (métriques,
+  `token_entry` : un replay ciblé doit supprimer toutes les lignes suffixées du groupe).
 - Le **distributed command bus** n'est **pas** défini par le SDK (pas d'autoconfig SDK) — il vient
   du starter `axon-springcloud-spring-boot-autoconfigure` (jar Axon). Le bean `RestTemplate` du
   SDK (`@Primary`, avec intercepteur OAuth2 `server-client`) est **injecté** dans
