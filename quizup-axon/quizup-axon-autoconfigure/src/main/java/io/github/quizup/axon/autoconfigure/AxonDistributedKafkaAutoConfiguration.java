@@ -29,6 +29,7 @@ import org.springframework.core.env.Environment;
 public class AxonDistributedKafkaAutoConfiguration {
 
     private static final String KAFKA_STREAMABLE_SOURCE_BEAN = "streamableKafkaMessageSource";
+    static final String STREAMABLE_SOURCE_BEAN_NAME = KAFKA_STREAMABLE_SOURCE_BEAN;
 
     /**
      * Câble la source par défaut des event processors sur le flux Kafka streamable et

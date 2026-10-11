@@ -2,10 +2,12 @@ package io.github.quizup.axon.autoconfigure;
 
 import org.axonframework.config.ConfigurerModule;
 import org.axonframework.config.ProcessingGroup;
+import org.axonframework.eventhandling.TrackedEventMessage;
 import org.axonframework.eventhandling.TrackingEventProcessorConfiguration;
 import org.axonframework.messaging.StreamableMessageSource;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
@@ -18,8 +20,8 @@ import java.util.List;
  *
  * <p>Pour chaque groupe de base configuré, un sélecteur de type (prioritaire sur l'annotation
  * {@link ProcessingGroup}) assigne les handlers annotés au nom suffixé `<groupe>-<instanceId>`, et
- * le processor correspondant est enregistré en <b>tracking</b> sur la source streamable par défaut
- * (Kafka) avec un token initial à la <b>queue</b> du flux.</p>
+ * le processor correspondant est enregistré en <b>tracking</b> sur la source streamable Kafka du
+ * SDK (pas l'event store local !) avec un token initial à la <b>queue</b> du flux.</p>
  *
  * <p>Conséquence opérationnelle : les noms de processors sont suffixés (métriques, et
  * {@code token_entry} — un replay ciblé d'un groupe instance-scopé doit supprimer toutes ses lignes
@@ -34,7 +36,8 @@ public class InstanceScopedProcessingGroupsAutoConfiguration {
     @Bean
     public ConfigurerModule instanceScopedProcessingGroupsConfigurer(
             InstanceScopedProcessingGroupsProperties properties,
-            Environment environment) {
+            Environment environment,
+            ApplicationContext applicationContext) {
         List<String> baseGroups = properties.instanceScopedGroups();
         if (baseGroups.isEmpty()) {
             return configurer -> {
@@ -47,13 +50,25 @@ public class InstanceScopedProcessingGroupsAutoConfiguration {
                 String scopedGroup = baseGroup + "-" + instanceId;
                 eventProcessing.assignHandlerTypesMatching(scopedGroup,
                         type -> isAnnotatedWith(type, baseGroup));
-                eventProcessing.registerTrackingEventProcessor(scopedGroup);
+                // Source explicite : le `registerTrackingEventProcessor(name)` à un argument lie
+                // le processor à l'event store LOCAL (vide côté BFF) — il faut la source streamable
+                // Kafka du SDK, comme pour les processors auto-créés.
+                eventProcessing.registerTrackingEventProcessor(scopedGroup,
+                        configuration -> kafkaSource(applicationContext));
                 eventProcessing.registerTrackingEventProcessorConfiguration(scopedGroup,
                         configuration -> TrackingEventProcessorConfiguration
                                 .forSingleThreadedProcessing()
                                 .andInitialTrackingToken(StreamableMessageSource::createTailToken));
             }
         });
+    }
+
+    @SuppressWarnings("unchecked")
+    private static StreamableMessageSource<TrackedEventMessage<?>> kafkaSource(
+            ApplicationContext applicationContext) {
+        return applicationContext.getBean(
+                AxonDistributedKafkaAutoConfiguration.STREAMABLE_SOURCE_BEAN_NAME,
+                StreamableMessageSource.class);
     }
 
     private static boolean isAnnotatedWith(Class<?> type, String expectedGroup) {
