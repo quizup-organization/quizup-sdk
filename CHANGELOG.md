@@ -1,3 +1,9 @@
+## [4.4.1](https://github.com/quizup-organization/quizup-sdk/compare/v4.4.0...v4.4.1) (2026-10-11)
+
+### Bug Fixes
+
+* **axon:** groupes instance-scopés sur la source Kafka du SDK (pas l'event store local) ([919aaa5](https://github.com/quizup-organization/quizup-sdk/commit/919aaa56a78a07f7cf12105e979385c66f8cbb12))
+
 ## [4.4.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.3.0...v4.4.0) (2026-10-11)
 
 ### Features
