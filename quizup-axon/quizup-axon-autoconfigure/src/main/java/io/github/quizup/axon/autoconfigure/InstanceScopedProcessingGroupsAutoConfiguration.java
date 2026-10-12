@@ -4,6 +4,7 @@ import org.axonframework.config.ConfigurerModule;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.TrackedEventMessage;
 import org.axonframework.eventhandling.TrackingEventProcessorConfiguration;
+import org.axonframework.eventhandling.TrackingToken;
 import org.axonframework.messaging.StreamableMessageSource;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -13,6 +14,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
 
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Processing groups **par instance** : chaque réplique d'un service à fan-out temps réel consomme
@@ -58,9 +60,22 @@ public class InstanceScopedProcessingGroupsAutoConfiguration {
                 eventProcessing.registerTrackingEventProcessorConfiguration(scopedGroup,
                         configuration -> TrackingEventProcessorConfiguration
                                 .forSingleThreadedProcessing()
-                                .andInitialTrackingToken(StreamableMessageSource::createTailToken));
+                                .andInitialTrackingToken(initialTokenBuilder()));
             }
         });
+    }
+
+    /**
+     * Token initial des groupes instance-scopés : la <b>queue</b> du flux (head), pas le début.
+     * <p>
+     * {@code createTailToken()} renvoie {@code null} pour la source Kafka, ce qui fait démarrer le
+     * processor au début du topic ({@code ConsumerSeekUtil} → offset 0) : chaque nouveau pod
+     * rejouait <b>tout</b> le flux et re-poussait les anciens événements aux clients connectés
+     * (toasts « déjà reçus », notifications dupliquées). Les clients complètent l'historique via
+     * les folds REST ; un nouveau pod ne consomme donc que les événements à venir.
+     */
+    static Function<StreamableMessageSource<TrackedEventMessage<?>>, TrackingToken> initialTokenBuilder() {
+        return StreamableMessageSource::createHeadToken;
     }
 
     @SuppressWarnings("unchecked")

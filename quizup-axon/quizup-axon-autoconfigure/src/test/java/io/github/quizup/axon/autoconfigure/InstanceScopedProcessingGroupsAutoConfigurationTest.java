@@ -6,6 +6,7 @@ import org.axonframework.config.DefaultConfigurer;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.TrackedEventMessage;
+import org.axonframework.eventhandling.TrackingToken;
 import org.axonframework.messaging.StreamableMessageSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
@@ -56,6 +57,24 @@ class InstanceScopedProcessingGroupsAutoConfigurationTest {
 
         assertThat(configuration.eventProcessingConfiguration().eventProcessors())
                 .containsKey("fanout");
+    }
+
+    /**
+     * Garde-fou anti-replay : un groupe instance-scopé démarre à la <b>queue</b> du flux (head).
+     * {@code createTailToken()} renvoie {@code null} pour Kafka et ferait rejouer tout le topic à
+     * chaque nouveau pod (notifications « déjà reçues » re-poussées aux clients connectés).
+     */
+    @Test
+    void initialToken_startsAtHead_soANewPodDoesNotReplayTheStream() {
+        StreamableMessageSource<TrackedEventMessage<?>> source = mockKafkaSource();
+        TrackingToken head = mock(TrackingToken.class);
+        when(source.createHeadToken()).thenReturn(head);
+
+        TrackingToken token = InstanceScopedProcessingGroupsAutoConfiguration
+                .initialTokenBuilder()
+                .apply(source);
+
+        assertThat(token).isSameAs(head);
     }
 
     @Test

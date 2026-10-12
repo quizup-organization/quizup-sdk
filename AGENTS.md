@@ -127,6 +127,9 @@ Les services QuizUp utilisent **deux** buses distribués, **tous deux** fournis 
   démarre à la **queue** du flux (aucun replay Kafka pour un nouveau pod ; les clients complètent
   l'historique via les folds REST). Les noms de processors sont donc suffixés (métriques,
   `token_entry` : un replay ciblé doit supprimer toutes les lignes suffixées du groupe).
+  **Piège** : pour la source Kafka, la queue du flux s'obtient avec `createHeadToken()` —
+  `createTailToken()` renvoie `null` (= **début** du topic) et ferait rejouer tout le flux à
+  chaque nouveau pod (notifications/événements re-poussés aux clients connectés).
 - Le **distributed command bus** n'est **pas** défini par le SDK (pas d'autoconfig SDK) — il vient
   du starter `axon-springcloud-spring-boot-autoconfigure` (jar Axon). Le bean `RestTemplate` du
   SDK (`@Primary`, avec intercepteur OAuth2 `server-client`) est **injecté** dans
