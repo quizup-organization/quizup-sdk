@@ -49,9 +49,11 @@ public class ConsoleController {
     private static final long ACTION_TIMEOUT_SECONDS = 30;
 
     private final ConsoleState state;
+    private final CommandActivityTracker commandActivityTracker;
 
-    public ConsoleController(ConsoleState state) {
+    public ConsoleController(ConsoleState state, CommandActivityTracker commandActivityTracker) {
         this.state = state;
+        this.commandActivityTracker = commandActivityTracker;
     }
 
     // ------------------------------------------------------------------ processors
@@ -64,6 +66,18 @@ public class ConsoleController {
     @GetMapping("/processors/{processor}")
     public ConsoleSnapshot.ProcessorSnapshot processor(@PathVariable String processor) {
         return state.processor(processor);
+    }
+
+    /** Lag (position de queue vs position courante) — calculé à la demande. */
+    @GetMapping("/processors/{processor}/lag")
+    public ConsoleState.LagReport lag(@PathVariable String processor) {
+        return state.lag(processor);
+    }
+
+    /** Commandes en vol par type (contenu natif « long-running commands ») — diagnostic seul. */
+    @GetMapping("/commands/in-flight")
+    public List<CommandActivityTracker.InFlightCommand> inFlightCommands() {
+        return commandActivityTracker.snapshot();
     }
 
     @PostMapping("/processors/{processor}/pause")

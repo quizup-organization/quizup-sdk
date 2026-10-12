@@ -1,8 +1,14 @@
 package io.github.quizup.axon.console;
 
+import com.github.kagkarlsson.scheduler.Scheduler;
+import com.github.kagkarlsson.scheduler.exceptions.TaskInstanceNotFoundException;
+import com.github.kagkarlsson.scheduler.task.TaskInstanceId;
 import org.axonframework.eventhandling.DomainEventMessage;
 import org.axonframework.eventsourcing.eventstore.DomainEventStream;
 import org.axonframework.eventsourcing.eventstore.EventStore;
+import org.axonframework.serialization.SerializedObject;
+import org.axonframework.serialization.Serializer;
+import org.axonframework.serialization.SimpleSerializedObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -36,11 +42,17 @@ public class ConsoleEventStoreService {
 
     private final ObjectProvider<DataSource> dataSourceProvider;
     private final ObjectProvider<EventStore> eventStoreProvider;
+    private final ObjectProvider<Scheduler> schedulerProvider;
+    private final ObjectProvider<Serializer> eventSerializerProvider;
 
     public ConsoleEventStoreService(ObjectProvider<DataSource> dataSourceProvider,
-                                    ObjectProvider<EventStore> eventStoreProvider) {
+                                    ObjectProvider<EventStore> eventStoreProvider,
+                                    ObjectProvider<Scheduler> schedulerProvider,
+                                    ObjectProvider<Serializer> eventSerializerProvider) {
         this.dataSourceProvider = dataSourceProvider;
         this.eventStoreProvider = eventStoreProvider;
+        this.schedulerProvider = schedulerProvider;
+        this.eventSerializerProvider = eventSerializerProvider;
     }
 
     public EventStoreStats stats() {
@@ -63,15 +75,47 @@ public class ConsoleEventStoreService {
         return entries;
     }
 
-    public List<SnapshotEntry> snapshots(String aggregateId) {
+    public List<SnapshotEntry> snapshots(String aggregateId, boolean withPayload) {
+        String payloadColumn = withPayload ? ", lo_get(payload)" : "";
         return jdbc().query(
                 "select event_identifier, aggregate_identifier, sequence_number, type, payload_type,"
-                        + " payload_revision, time_stamp from snapshot_event_entry"
+                        + " payload_revision, time_stamp" + payloadColumn + " from snapshot_event_entry"
                         + " where aggregate_identifier = ? order by sequence_number desc limit " + MAX_SNAPSHOTS,
                 (rs, rowNum) -> new SnapshotEntry(
                         rs.getString(1), rs.getString(2), rs.getLong(3), rs.getString(4),
-                        rs.getString(5), rs.getString(6), parseTimestamp(rs.getString(7))),
+                        rs.getString(5), rs.getString(6), parseTimestamp(rs.getString(7)),
+                        withPayload ? decodePayload(rs.getBytes(8), rs.getString(5), rs.getString(6)) : null),
                 aggregateId);
+    }
+
+    private Object decodePayload(byte[] bytes, String payloadType, String revision) {
+        Serializer serializer = eventSerializerProvider.getIfAvailable();
+        if (serializer == null || bytes == null || payloadType == null) {
+            return null;
+        }
+        try {
+            SerializedObject<byte[]> serialized =
+                    new SimpleSerializedObject<>(bytes, byte[].class, payloadType, revision);
+            return serializer.deserialize(serialized);
+        } catch (RuntimeException exception) {
+            logger.warn("Could not deserialize snapshot payload of type '{}': {}",
+                    payloadType, exception.toString());
+            return null;
+        }
+    }
+
+    /** Annule une tâche planifiée (deadline) — contenu natif Axon Server (« cancel scheduled event »). */
+    public void cancelScheduledEvent(String taskName, String taskInstance) {
+        Scheduler scheduler = schedulerProvider.getIfAvailable();
+        if (scheduler == null) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Scheduler is not available");
+        }
+        try {
+            scheduler.cancel(TaskInstanceId.of(taskName, taskInstance));
+        } catch (TaskInstanceNotFoundException exception) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Unknown scheduled event: " + taskName + "/" + taskInstance);
+        }
     }
 
     public List<EventSearchEntry> searchEvents(String type, Long from, Integer limit) {
@@ -162,7 +206,7 @@ public class ConsoleEventStoreService {
     }
 
     public record SnapshotEntry(String id, String aggregateId, long sequenceNumber, String aggregateType,
-                                String payloadType, String payloadRevision, Instant timestamp) {
+                                String payloadType, String payloadRevision, Instant timestamp, Object payload) {
     }
 
     public record EventSearchEntry(String id, String aggregateId, String aggregateType, long sequenceNumber,

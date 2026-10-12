@@ -1,9 +1,12 @@
 package io.github.quizup.axon.console;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -36,8 +39,10 @@ public class ConsoleEventStoreController {
     }
 
     @GetMapping("/eventstore/aggregates/{aggregateId}/snapshots")
-    public List<ConsoleEventStoreService.SnapshotEntry> snapshots(@PathVariable String aggregateId) {
-        return service.snapshots(aggregateId);
+    public List<ConsoleEventStoreService.SnapshotEntry> snapshots(
+            @PathVariable String aggregateId,
+            @RequestParam(defaultValue = "false") boolean withPayload) {
+        return service.snapshots(aggregateId, withPayload);
     }
 
     @GetMapping("/eventstore/events")
@@ -52,5 +57,11 @@ public class ConsoleEventStoreController {
     public List<ConsoleEventStoreService.ScheduledEventEntry> scheduledEvents(
             @RequestParam(required = false) Integer limit) {
         return service.scheduledEvents(limit);
+    }
+
+    @DeleteMapping("/scheduled-events/{taskName}/{taskInstance}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelScheduledEvent(@PathVariable String taskName, @PathVariable String taskInstance) {
+        service.cancelScheduledEvent(taskName, taskInstance);
     }
 }

@@ -6,8 +6,15 @@ import org.axonframework.config.SagaConfiguration;
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.EventProcessor;
 import org.axonframework.eventhandling.EventTrackerStatus;
+import org.axonframework.eventhandling.GapAwareTrackingToken;
+import org.axonframework.eventhandling.GlobalSequenceTrackingToken;
+import org.axonframework.eventhandling.ReplayToken;
 import org.axonframework.eventhandling.StreamingEventProcessor;
 import org.axonframework.eventhandling.SubscribingEventProcessor;
+import org.axonframework.eventhandling.TrackedEventMessage;
+import org.axonframework.eventhandling.TrackingEventProcessor;
+import org.axonframework.eventhandling.TrackingToken;
+import org.axonframework.messaging.StreamableMessageSource;
 import org.axonframework.messaging.deadletter.SequencedDeadLetterQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +25,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -73,6 +82,7 @@ public class ConsoleState {
                 environment.getProperty("spring.application.name", "unknown"),
                 applicationVersion(),
                 instanceId(),
+                instanceAddress(),
                 ManagementFactory.getRuntimeMXBean().getUptime() / 1000,
                 processors);
     }
@@ -103,6 +113,71 @@ public class ConsoleState {
                 .stream()
                 .map(SagaConfiguration::processingGroup)
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * <b>Lag</b> d'un processor (contenu natif Axon Server) : position de queue du flux (tail) vs
+     * position courante de chaque segment. Calculé à la demande (le tail Kafka peut coûter un
+     * appel admin) — jamais dans le snapshot poussé toutes les 15 s.
+     */
+    public LagReport lag(String name) {
+        EventProcessor processor = eventProcessing().eventProcessors().get(name);
+        if (!(processor instanceof StreamingEventProcessor streaming)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Processor is not streaming: " + name);
+        }
+        Long tail = tailPosition(processor);
+        List<SegmentLag> segments = streaming.processingStatus()
+                .entrySet()
+                .stream()
+                .map(entry -> {
+                    Long position = optionalPosition(entry.getValue().getCurrentPosition());
+                    Long lag = position == null || tail == null ? null : Math.max(0L, tail - position);
+                    return new SegmentLag(entry.getKey(), position, lag);
+                })
+                .toList();
+        Long maxLag = segments.stream()
+                .map(SegmentLag::lag)
+                .filter(Objects::nonNull)
+                .max(Long::compareTo)
+                .orElse(null);
+        return new LagReport(name, tail, segments, maxLag);
+    }
+
+    private static Long tailPosition(EventProcessor processor) {
+        StreamableMessageSource<? extends TrackedEventMessage<?>> source = messageSource(processor);
+        if (source == null) {
+            return null;
+        }
+        try {
+            return positionOf(source.createTailToken());
+        } catch (RuntimeException exception) {
+            logger.warn("Could not resolve tail token of processor '{}': {}",
+                    processor.getName(), exception.toString());
+            return null;
+        }
+    }
+
+    private static StreamableMessageSource<? extends TrackedEventMessage<?>> messageSource(EventProcessor processor) {
+        // Seul le TrackingEventProcessor expose sa source (les services QuizUp utilisent des TEP).
+        if (processor instanceof TrackingEventProcessor trackingEventProcessor) {
+            return trackingEventProcessor.getMessageSource();
+        }
+        return null;
+    }
+
+    static Long positionOf(TrackingToken token) {
+        TrackingToken current = token;
+        while (current instanceof ReplayToken replayToken) {
+            current = replayToken.getTokenAtReset();
+        }
+        if (current instanceof GapAwareTrackingToken gapAware) {
+            return gapAware.getIndex();
+        }
+        if (current instanceof GlobalSequenceTrackingToken global) {
+            return global.getGlobalIndex();
+        }
+        return null;
     }
 
     private ConsoleSnapshot.ProcessorSnapshot processorSnapshot(String name, EventProcessor processor) {
@@ -203,6 +278,23 @@ public class ConsoleState {
     }
 
     /**
+     * Adresse `ip:port` de l'instance (permet à la console de cibler précisément un pod pour les
+     * actions, y compris en multi-réplicas).
+     */
+    private String instanceAddress() {
+        String host = environment.getProperty("spring.cloud.client.ip-address");
+        if (host == null || host.isBlank()) {
+            try {
+                host = InetAddress.getLocalHost().getHostAddress();
+            } catch (Exception exception) {
+                host = "localhost";
+            }
+        }
+        String port = environment.getProperty("server.port", "8080");
+        return host + ":" + port;
+    }
+
+    /**
      * Exposition des statuts de segments pour les jauges (aucun I/O hormis la DLQ).
      */
     public Map<String, EventProcessor> processors() {
@@ -218,5 +310,13 @@ public class ConsoleState {
 
     public static boolean replaying(EventProcessor processor) {
         return processor instanceof StreamingEventProcessor streaming && streaming.isReplaying();
+    }
+
+    // ------------------------------------------------------------------ contracts
+
+    public record LagReport(String processor, Long tailPosition, List<SegmentLag> segments, Long maxLag) {
+    }
+
+    public record SegmentLag(int segmentId, Long currentPosition, Long lag) {
     }
 }

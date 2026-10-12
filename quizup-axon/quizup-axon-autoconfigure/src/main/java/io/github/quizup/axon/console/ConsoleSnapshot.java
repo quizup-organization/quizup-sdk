@@ -16,6 +16,7 @@ public record ConsoleSnapshot(
         String application,
         String applicationVersion,
         String instanceId,
+        String address,
         long uptimeSeconds,
         List<ProcessorSnapshot> processors
 ) {

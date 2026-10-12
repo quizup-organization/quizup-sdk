@@ -182,13 +182,20 @@ Les services QuizUp utilisent **deux** buses distribués, **tous deux** fournis 
   FQCN exclus par le provider, tous les groupes de sagas exclus côté état/API via
   `sagaConfigurations()`), et `quizup.axon.dlq.excluded-groups`. Bornes :
   `quizup.axon.dlq.{enabled,max-sequences,max-sequence-size,claim-duration}`.
+- **`build-info` hérité** (pluginManagement du parent) : chaque service embarque
+  `META-INF/build-info.properties` → `BuildProperties` alimente le tag métrique `version` **et** les
+  snapshots de l'agent (plus de `unknown`).
 - **État & API interne** (`AxonConsoleAutoConfiguration`) : `ConsoleState` (processors, segments,
   erreurs, stats DLQ) ; endpoint interne `/internal/console/**` (JWT M2M requis, jamais ingressed) —
   lecture DLQ paginée, retry/delete/clear de séquence, pause/start, reset (tail/head/instant,
-  processor **à l'arrêt**), split/merge de segment.
+  processor **à l'arrêt**), split/merge de segment ; **event store** (stats, événements/snapshots par
+  agrégat, recherche bornée par type) et **scheduled events** (db-scheduler, lecture seule) —
+  `ConsoleEventStoreService` (JdbcTemplate read-only + `EventStore.readEvents`).
 - **Agent push** : `quizup.axon.console.enabled=true` (défaut `false`), `url` (défaut
   `http://quizup-console.quizup-prod.svc.cluster.local`, Service k8s port 80), `interval` (15 s) —
   snapshot borné versionné `v1` poussé en M2M via le `RestTemplate` OAuth2 `server-client`.
+  Snapshot enrichi (contenu natif Axon Server) : `canPause/canPlay/canSplit/canMerge`,
+  `tokenStoreIdentifier`, `activeThreads`, `capacity`, `warnings`, `onePartOf` par segment.
 - **Métriques** : `quizup.axon.console.dlq.size|sequences`, `...processor.caught_up|replaying`
   (jauges enregistrées sur `ApplicationReadyEvent`, jamais pendant l'initialisation Axon).
 

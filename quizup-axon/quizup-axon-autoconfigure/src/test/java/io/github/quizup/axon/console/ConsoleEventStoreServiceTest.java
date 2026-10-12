@@ -35,7 +35,7 @@ class ConsoleEventStoreServiceTest {
                 "event-1", Instant.parse("2026-10-12T08:09:25.280Z"));
         when(eventStore.readEvents("demo-1")).thenReturn(DomainEventStream.of(event));
 
-        ConsoleEventStoreService service = new ConsoleEventStoreService(provider(null), provider(eventStore));
+        ConsoleEventStoreService service = new ConsoleEventStoreService(provider(null), provider(eventStore), provider(null), provider(null));
 
         var entries = service.aggregateEvents("demo-1", null);
 
@@ -57,18 +57,29 @@ class ConsoleEventStoreServiceTest {
                 new GenericDomainEventMessage<>("DemoAggregate", "demo-1", 0L, "a"),
                 new GenericDomainEventMessage<>("DemoAggregate", "demo-1", 1L, "b")));
 
-        ConsoleEventStoreService service = new ConsoleEventStoreService(provider(null), provider(eventStore));
+        ConsoleEventStoreService service = new ConsoleEventStoreService(provider(null), provider(eventStore), provider(null), provider(null));
 
         assertThat(service.aggregateEvents("demo-1", 1L)).hasSize(1);
     }
 
     @Test
     void statsFailWithServiceUnavailableWithoutDataSource() {
-        ConsoleEventStoreService service = new ConsoleEventStoreService(provider(null), provider(null));
+        ConsoleEventStoreService service =
+                new ConsoleEventStoreService(provider(null), provider(null), provider(null), provider(null));
 
         assertThatThrownBy(service::stats)
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("DataSource");
+    }
+
+    @Test
+    void cancelScheduledEventFailsWithServiceUnavailableWithoutScheduler() {
+        ConsoleEventStoreService service =
+                new ConsoleEventStoreService(provider(null), provider(null), provider(null), provider(null));
+
+        assertThatThrownBy(() -> service.cancelScheduledEvent("task", "instance"))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Scheduler");
     }
 
     private static <T> ObjectProvider<T> provider(T value) {
