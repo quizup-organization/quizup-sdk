@@ -1,3 +1,9 @@
+## [4.5.1](https://github.com/quizup-organization/quizup-sdk/compare/v4.5.0...v4.5.1) (2026-10-12)
+
+### Bug Fixes
+
+* **console:** URL par défaut de l'agent = Service k8s quizup-console (port 80) ([f30be89](https://github.com/quizup-organization/quizup-sdk/commit/f30be895a855a9adfafdde6337d69b6f49e96417))
+
 ## [4.5.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.4.1...v4.5.0) (2026-10-12)
 
 ### Features
