@@ -1,3 +1,9 @@
+## [4.7.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.6.0...v4.7.0) (2026-10-12)
+
+### Features
+
+* **console:** lag chiffré, commandes en vol, payload snapshots, annulation scheduled, adresse d'instance ([01dcf26](https://github.com/quizup-organization/quizup-sdk/commit/01dcf26aab96f3e0ce7245ca3a9a70f583ece384))
+
 ## [4.6.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.5.2...v4.6.0) (2026-10-12)
 
 ### Features
