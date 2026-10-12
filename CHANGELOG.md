@@ -1,3 +1,9 @@
+## [4.5.2](https://github.com/quizup-organization/quizup-sdk/compare/v4.5.1...v4.5.2) (2026-10-12)
+
+### Bug Fixes
+
+* **axon:** groupes instance-scopés démarrés à la queue du flux (fin du replay complet par pod) ([615ab1f](https://github.com/quizup-organization/quizup-sdk/commit/615ab1f5458cc3d8b59e91e2c727ba48379d4d4e))
+
 ## [4.5.1](https://github.com/quizup-organization/quizup-sdk/compare/v4.5.0...v4.5.1) (2026-10-12)
 
 ### Bug Fixes
