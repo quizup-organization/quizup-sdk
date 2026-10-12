@@ -1,3 +1,9 @@
+## [4.5.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.4.1...v4.5.0) (2026-10-12)
+
+### Features
+
+* **console:** DLQ Axon par défaut, agent console et API interne d'exploitation ([98e1868](https://github.com/quizup-organization/quizup-sdk/commit/98e186899c22f3452dee77e0a5b26c4ccadb2f87))
+
 ## [4.4.1](https://github.com/quizup-organization/quizup-sdk/compare/v4.4.0...v4.4.1) (2026-10-11)
 
 ### Bug Fixes
