@@ -184,8 +184,8 @@ Les services QuizUp utilisent **deux** buses distribués, **tous deux** fournis 
   lecture DLQ paginée, retry/delete/clear de séquence, pause/start, reset (tail/head/instant,
   processor **à l'arrêt**), split/merge de segment.
 - **Agent push** : `quizup.axon.console.enabled=true` (défaut `false`), `url` (défaut
-  `http://quizup-console.quizup-prod.svc.cluster.local:8080`), `interval` (15 s) — snapshot borné
-  versionné `v1` poussé en M2M via le `RestTemplate` OAuth2 `server-client`.
+  `http://quizup-console.quizup-prod.svc.cluster.local`, Service k8s port 80), `interval` (15 s) —
+  snapshot borné versionné `v1` poussé en M2M via le `RestTemplate` OAuth2 `server-client`.
 - **Métriques** : `quizup.axon.console.dlq.size|sequences`, `...processor.caught_up|replaying`
   (jauges enregistrées sur `ApplicationReadyEvent`, jamais pendant l'initialisation Axon).
 

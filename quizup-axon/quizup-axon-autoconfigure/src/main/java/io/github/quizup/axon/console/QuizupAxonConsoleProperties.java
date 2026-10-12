@@ -32,7 +32,7 @@ public record QuizupAxonConsoleProperties(
         String instanceId
 ) {
 
-    public static final String DEFAULT_URL = "http://quizup-console.quizup-prod.svc.cluster.local:8080";
+    public static final String DEFAULT_URL = "http://quizup-console.quizup-prod.svc.cluster.local";
 
     public QuizupAxonConsoleProperties {
         if (enabled == null) {
