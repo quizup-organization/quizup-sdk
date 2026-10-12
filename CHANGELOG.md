@@ -1,3 +1,9 @@
+## [4.6.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.5.2...v4.6.0) (2026-10-12)
+
+### Features
+
+* **console:** build-info, snapshot enrichi et API interne event store/scheduled ([c6ae47e](https://github.com/quizup-organization/quizup-sdk/commit/c6ae47ec50a6a5344657799eb511cd4654d75e12))
+
 ## [4.5.2](https://github.com/quizup-organization/quizup-sdk/compare/v4.5.1...v4.5.2) (2026-10-12)
 
 ### Bug Fixes
