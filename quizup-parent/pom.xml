@@ -221,6 +221,17 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring-boot.version}</version>
+                    <executions>
+                        <!-- Génère META-INF/build-info.properties dans chaque service (hérité) :
+                             version réelle exposée par BuildProperties (tags métriques `version`,
+                             snapshots de l'agent console) au lieu de `unknown`. -->
+                        <execution>
+                            <id>build-info</id>
+                            <goals>
+                                <goal>build-info</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

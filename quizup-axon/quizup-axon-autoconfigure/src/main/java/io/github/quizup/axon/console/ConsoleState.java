@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -108,21 +109,45 @@ public class ConsoleState {
         boolean running = processor.isRunning();
         boolean error = processor.isError();
         if (processor instanceof StreamingEventProcessor streaming) {
-            List<ConsoleSnapshot.SegmentSnapshot> segments = streaming.processingStatus()
-                    .entrySet()
+            Map<Integer, EventTrackerStatus> statuses = streaming.processingStatus();
+            int segmentCount = statuses.size();
+            int capacity = streaming.maxCapacity();
+            List<ConsoleSnapshot.SegmentSnapshot> segments = statuses.entrySet()
                     .stream()
-                    .map(entry -> segmentSnapshot(entry.getKey(), entry.getValue()))
+                    .map(entry -> segmentSnapshot(entry.getKey(), entry.getValue(), segmentCount))
                     .toList();
             return new ConsoleSnapshot.ProcessorSnapshot(
                     name, "tracking", running, error, streaming.isReplaying(),
-                    streaming.supportsReset(), segments, dlqStats(name));
+                    streaming.supportsReset(),
+                    running, !running, segmentCount < capacity, segmentCount > 1,
+                    streaming.getTokenStoreIdentifier(), segmentCount, capacity,
+                    List.of(), warnings(segments), segments, dlqStats(name));
         }
         String mode = processor instanceof SubscribingEventProcessor ? "subscribing" : processor.getClass().getSimpleName();
         return new ConsoleSnapshot.ProcessorSnapshot(
-                name, mode, running, error, false, false, List.of(), dlqStats(name));
+                name, mode, running, error, false, false,
+                running, !running, false, false, null, 0, 0,
+                List.of(), List.of(), List.of(), dlqStats(name));
     }
 
-    private ConsoleSnapshot.SegmentSnapshot segmentSnapshot(int segmentId, EventTrackerStatus status) {
+    private static List<String> warnings(List<ConsoleSnapshot.SegmentSnapshot> segments) {
+        List<String> warnings = new ArrayList<>();
+        long errors = segments.stream().filter(ConsoleSnapshot.SegmentSnapshot::errorState).count();
+        if (errors > 0) {
+            warnings.add(errors + " segment(s) en erreur");
+        }
+        long replaying = segments.stream().filter(ConsoleSnapshot.SegmentSnapshot::replaying).count();
+        if (replaying > 0) {
+            warnings.add("Replay en cours sur " + replaying + " segment(s)");
+        }
+        long merging = segments.stream().filter(ConsoleSnapshot.SegmentSnapshot::merging).count();
+        if (merging > 0) {
+            warnings.add("Fusion de segments en cours");
+        }
+        return List.copyOf(warnings);
+    }
+
+    private ConsoleSnapshot.SegmentSnapshot segmentSnapshot(int segmentId, EventTrackerStatus status, int onePartOf) {
         Throwable segmentError = status.isErrorState() ? status.getError() : null;
         return new ConsoleSnapshot.SegmentSnapshot(
                 segmentId,
@@ -133,6 +158,7 @@ public class ConsoleState {
                 status.isErrorState(),
                 optionalPosition(status.getCurrentPosition()),
                 optionalPosition(status.getResetPosition()),
+                onePartOf,
                 segmentError != null ? segmentError.getClass().getName() : null,
                 Boolean.TRUE.equals(properties.includeErrorDetails()) ? truncate(segmentError) : null);
     }

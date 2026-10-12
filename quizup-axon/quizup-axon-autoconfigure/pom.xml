@@ -71,6 +71,19 @@
             <artifactId>axon-micrometer</artifactId>
         </dependency>
 
+        <!-- API interne event store (Lecture JPA read-only + EventStore) : fournis à l'exécution
+             par les services (starter data-jpa / axon-eventsourcing) — optionnels ici. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.axonframework</groupId>
+            <artifactId>axon-eventsourcing</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <dependency>
             <groupId>org.axonframework</groupId>
             <artifactId>axon-tracing-opentelemetry</artifactId>

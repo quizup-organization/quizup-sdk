@@ -37,6 +37,8 @@ class ConsoleStateTest {
         when(processor.isError()).thenReturn(false);
         when(processor.isReplaying()).thenReturn(true);
         when(processor.supportsReset()).thenReturn(true);
+        when(processor.maxCapacity()).thenReturn(16);
+        when(processor.getTokenStoreIdentifier()).thenReturn("test-token-store");
         when(processor.processingStatus()).thenReturn(Map.of(0, status));
         when(status.getSegment()).thenReturn(Segment.ROOT_SEGMENT);
         when(status.isCaughtUp()).thenReturn(false);
@@ -65,9 +67,19 @@ class ConsoleStateTest {
         assertThat(processorSnapshot.running()).isTrue();
         assertThat(processorSnapshot.replaying()).isTrue();
         assertThat(processorSnapshot.supportsReset()).isTrue();
+        assertThat(processorSnapshot.canPause()).isTrue();
+        assertThat(processorSnapshot.canPlay()).isFalse();
+        assertThat(processorSnapshot.canSplit()).isTrue();
+        assertThat(processorSnapshot.canMerge()).isFalse();
+        assertThat(processorSnapshot.tokenStoreIdentifier()).isEqualTo("test-token-store");
+        assertThat(processorSnapshot.activeThreads()).isEqualTo(1);
+        assertThat(processorSnapshot.capacity()).isEqualTo(16);
+        assertThat(processorSnapshot.warnings())
+                .containsExactly("1 segment(s) en erreur", "Replay en cours sur 1 segment(s)");
         assertThat(processorSnapshot.segments()).hasSize(1);
         ConsoleSnapshot.SegmentSnapshot segment = processorSnapshot.segments().getFirst();
         assertThat(segment.segmentId()).isZero();
+        assertThat(segment.onePartOf()).isEqualTo(1);
         assertThat(segment.caughtUp()).isFalse();
         assertThat(segment.errorState()).isTrue();
         assertThat(segment.errorType()).isEqualTo(IllegalStateException.class.getName());

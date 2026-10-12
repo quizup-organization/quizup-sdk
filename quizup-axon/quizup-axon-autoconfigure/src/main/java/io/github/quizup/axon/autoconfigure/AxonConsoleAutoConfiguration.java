@@ -2,6 +2,8 @@ package io.github.quizup.axon.autoconfigure;
 
 import io.github.quizup.axon.console.ConsoleAgent;
 import io.github.quizup.axon.console.ConsoleController;
+import io.github.quizup.axon.console.ConsoleEventStoreController;
+import io.github.quizup.axon.console.ConsoleEventStoreService;
 import io.github.quizup.axon.console.ConsoleState;
 import io.github.quizup.axon.console.QuizupAxonConsoleProperties;
 import io.micrometer.core.instrument.Gauge;
@@ -9,6 +11,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.axonframework.config.Configuration;
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.EventProcessor;
+import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.axonframework.messaging.deadletter.SequencedDeadLetterQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +28,11 @@ import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import javax.sql.DataSource;
 import java.util.Map;
 
 /**
@@ -75,6 +80,28 @@ public class AxonConsoleAutoConfiguration {
     public ConsoleController consoleController(ConsoleState state) {
         logger.info("Axon console internal API enabled (/internal/console/**)");
         return new ConsoleController(state);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnWebApplication
+    @ConditionalOnClass(JdbcTemplate.class)
+    @ConditionalOnProperty(prefix = "quizup.axon.console", name = "internal-api-enabled",
+            havingValue = "true", matchIfMissing = true)
+    public ConsoleEventStoreService consoleEventStoreService(
+            ObjectProvider<DataSource> dataSourceProvider,
+            ObjectProvider<EventStore> eventStoreProvider) {
+        return new ConsoleEventStoreService(dataSourceProvider, eventStoreProvider);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnWebApplication
+    @ConditionalOnClass(JdbcTemplate.class)
+    @ConditionalOnProperty(prefix = "quizup.axon.console", name = "internal-api-enabled",
+            havingValue = "true", matchIfMissing = true)
+    public ConsoleEventStoreController consoleEventStoreController(ConsoleEventStoreService service) {
+        return new ConsoleEventStoreController(service);
     }
 
     /**

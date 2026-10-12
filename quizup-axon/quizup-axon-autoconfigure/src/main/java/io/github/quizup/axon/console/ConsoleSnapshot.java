@@ -22,6 +22,11 @@ public record ConsoleSnapshot(
 
     public static final String VERSION = "v1";
 
+    /**
+     * État d'un event processor. Les champs {@code canPause/canPlay/canSplit/canMerge},
+     * {@code tokenStoreIdentifier}, {@code activeThreads}, {@code capacity} et
+     * {@code freeThreadInstances} reproduisent le contenu natif Axon Server.
+     */
     public record ProcessorSnapshot(
             String name,
             String mode,
@@ -29,6 +34,15 @@ public record ConsoleSnapshot(
             boolean error,
             boolean replaying,
             boolean supportsReset,
+            boolean canPause,
+            boolean canPlay,
+            boolean canSplit,
+            boolean canMerge,
+            String tokenStoreIdentifier,
+            int activeThreads,
+            int capacity,
+            List<String> freeThreadInstances,
+            List<String> warnings,
             List<SegmentSnapshot> segments,
             DlqStats dlq
     ) {
@@ -43,6 +57,7 @@ public record ConsoleSnapshot(
             boolean errorState,
             Long currentPosition,
             Long resetPosition,
+            int onePartOf,
             String errorType,
             String errorMessage
     ) {
