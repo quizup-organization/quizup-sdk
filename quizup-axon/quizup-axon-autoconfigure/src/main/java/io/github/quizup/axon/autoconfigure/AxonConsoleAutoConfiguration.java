@@ -9,9 +9,8 @@ import io.github.quizup.axon.console.ConsoleState;
 import io.github.quizup.axon.console.QuizupAxonConsoleProperties;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.config.Configuration;
-import org.axonframework.config.Configurer;
-import org.axonframework.config.ConfigurerModule;
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.EventProcessor;
 import org.axonframework.eventsourcing.eventstore.EventStore;
@@ -92,11 +91,19 @@ public class AxonConsoleAutoConfiguration {
         return new CommandActivityTracker();
     }
 
-    /** Suit les commandes en vol (nombre + âge) sur le bus de commandes local. */
+    /**
+     * Suit les commandes en vol (nombre + âge) sur le bus de commandes distribué. Enregistrement
+     * différé ({@code @PostConstruct}) — jamais via {@code ConfigurerModule} : résoudre le bus
+     * pendant l'initialisation de la {@code Configuration} crée un cycle de beans dès qu'une
+     * projection injecte {@code CommandGateway}.
+     */
     @Bean
-    public ConfigurerModule commandActivityTrackerConfigurer(CommandActivityTracker tracker) {
-        return configurer -> configurer.onInitialize(configuration ->
-                configuration.commandBus().registerHandlerInterceptor(tracker));
+    @ConditionalOnMissingBean
+    public CommandActivityTrackerRegistrar commandActivityTrackerRegistrar(
+            CommandActivityTracker tracker,
+            @Qualifier("distributedCommandBus") ObjectProvider<CommandBus> distributedCommandBus,
+            ObjectProvider<CommandBus> anyCommandBus) {
+        return new CommandActivityTrackerRegistrar(tracker, distributedCommandBus, anyCommandBus);
     }
 
     @Bean
