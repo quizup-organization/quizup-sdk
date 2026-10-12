@@ -1,3 +1,9 @@
+## [4.7.1](https://github.com/quizup-organization/quizup-sdk/compare/v4.7.0...v4.7.1) (2026-10-12)
+
+### Bug Fixes
+
+* **sdk:** suivi des commandes en vol enregistré en @PostConstruct (cycle de beans Configuration/bus distribué au démarrage des services à projection CommandGateway) ([6de1331](https://github.com/quizup-organization/quizup-sdk/commit/6de133132c39183a954e72a6e94eda1b537f85bb))
+
 ## [4.7.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.6.0...v4.7.0) (2026-10-12)
 
 ### Features
