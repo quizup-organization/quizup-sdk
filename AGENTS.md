@@ -165,6 +165,32 @@ Les services QuizUp utilisent **deux** buses distribués, **tous deux** fournis 
 
 ---
 
+## 4ter. Console d'exploitation Axon & DLQ (`AxonConsole*AutoConfiguration`)
+
+Équivalent fonctionnel open source de la Axoniq Platform — référence de parité :
+`../../product/axon-platform-parity.md`.
+
+- **DLQ activée par défaut** (`AxonConsoleDlqAutoConfiguration`) : un événement dont le handler
+  échoue est **enqueued** au lieu de bloquer indéfiniment le segment du processor. Le bean Axon
+  `DeadLetterQueueProviderConfigurerModule` (no-op de `JpaAutoConfiguration`) est **remplacé** par
+  `QuizupDeadLetterQueueProviderConfigurerModule` (auto-config `afterName=HibernateJpaAutoConfiguration`,
+  `@AutoConfigureBefore(JpaAutoConfiguration)` — verrouillé par test). Sont **exclus** : groupes
+  instance-scopés (`quizup.axon.instance-scoped-groups`), **sagas** (Axon ne les wrappe pas : groupes
+  FQCN exclus par le provider, tous les groupes de sagas exclus côté état/API via
+  `sagaConfigurations()`), et `quizup.axon.dlq.excluded-groups`. Bornes :
+  `quizup.axon.dlq.{enabled,max-sequences,max-sequence-size,claim-duration}`.
+- **État & API interne** (`AxonConsoleAutoConfiguration`) : `ConsoleState` (processors, segments,
+  erreurs, stats DLQ) ; endpoint interne `/internal/console/**` (JWT M2M requis, jamais ingressed) —
+  lecture DLQ paginée, retry/delete/clear de séquence, pause/start, reset (tail/head/instant,
+  processor **à l'arrêt**), split/merge de segment.
+- **Agent push** : `quizup.axon.console.enabled=true` (défaut `false`), `url` (défaut
+  `http://quizup-console.quizup-prod.svc.cluster.local:8080`), `interval` (15 s) — snapshot borné
+  versionné `v1` poussé en M2M via le `RestTemplate` OAuth2 `server-client`.
+- **Métriques** : `quizup.axon.console.dlq.size|sequences`, `...processor.caught_up|replaying`
+  (jauges enregistrées sur `ApplicationReadyEvent`, jamais pendant l'initialisation Axon).
+
+---
+
 ## 5. Types partagés (`microservice-core`)
 
 Packages sous `io.github.quizup.microservice.core.domain.*` :
