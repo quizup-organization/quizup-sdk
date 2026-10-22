@@ -10,3 +10,4 @@ io.github.quizup.axon.autoconfigure.AxonDistributedFallbackRegistrationAutoConfi
 io.github.quizup.axon.autoconfigure.InstanceScopedProcessingGroupsAutoConfiguration
 io.github.quizup.axon.autoconfigure.AxonConsoleDlqAutoConfiguration
 io.github.quizup.axon.autoconfigure.AxonConsoleAutoConfiguration
+io.github.quizup.axon.autoconfigure.AccountErasureAutoConfiguration
