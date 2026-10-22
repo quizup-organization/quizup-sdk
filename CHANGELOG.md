@@ -1,3 +1,9 @@
+## [4.8.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.7.1...v4.8.0) (2026-10-22)
+
+### Features
+
+* **account:** événements transverses de suppression et effacement de l'event store ([01409cc](https://github.com/quizup-organization/quizup-sdk/commit/01409cc023459bfaa850f336d88bdc523254cdbd))
+
 ## [4.7.1](https://github.com/quizup-organization/quizup-sdk/compare/v4.7.0...v4.7.1) (2026-10-12)
 
 ### Bug Fixes
