@@ -15,12 +15,18 @@ Fournir à tous les microservices QuizUp :
 - les **versions** de dépendances (Spring Boot, Axon, Java, Lombok) via le BOM parent
 - une **auto-configuration Spring Boot** (CORS, Swagger, Security, WebSocket, Actuator,
   **Observabilité** Prometheus/Micrometer, PasswordEncoder, exception handler)
-- des **types domaine partagés** (`microservice-core`) : exceptions (`BaseProblem`,
-  `ProblemCategory`), DTO de recherche/transport (`SearchRequest`, `FilterRequest`,
+- des **types techniques partagés** (`microservice-core`) : exceptions (`BaseProblem`,
+  `ProblemCategory`), DTO de recherche/transport génériques (`SearchRequest`, `FilterRequest`,
   `SortRequest`, `PageRequest` → `SearchResponse<T>`), etc.
 - un **starter Axon distribué** (RabbitMQ, deadlines, distributed query)
 
 **Package racine** : `io.github.quizup`
+
+> **Interdiction — contrats métier** : ne jamais ajouter dans ce repo un événement, une commande,
+> une query, un read model, un DTO ou une énumération appartenant à un bounded context. Ces
+> contrats vivent dans le `quizup-{service}-domain` du service émetteur. Le SDK ne contient que
+> des types techniques réellement génériques et des outils d'infrastructure. Voir la règle
+> normative `AGENTS.md` § 2.1 (racine du workspace).
 
 ---
 
