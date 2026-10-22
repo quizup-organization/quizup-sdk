@@ -1,3 +1,13 @@
+## [5.0.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.8.0...v5.0.0) (2026-10-22)
+
+### ⚠ BREAKING CHANGES
+
+* **sdk:** retire les contrats métier inter-services du SDK
+
+### Code Refactoring
+
+* **sdk:** retire les contrats métier inter-services du SDK ([0e28fda](https://github.com/quizup-organization/quizup-sdk/commit/0e28fdaa4f5294fff4fe65fd38eed11900db943e))
+
 ## [4.8.0](https://github.com/quizup-organization/quizup-sdk/compare/v4.7.1...v4.8.0) (2026-10-22)
 
 ### Features
